@@ -53,3 +53,7 @@ go test ./packages/tty-go/...
 [`examples/mvd-server`](../../examples/mvd-server) serves the setup screens of an
 existing Bubble Tea program (mvd) without forking its TUI. Writing `Accessible()`
 for it cost about one mapper function per screen; see its README for the findings.
+
+For a program in another language, see [Integrating another language](../../docs/integrating-a-language.md): most
+need only `treactui serve`, and the protocol's shared [conformance cases](../protocol/conformance/cases.json) are
+run against this adapter's `protocol` package (`conformance_test.go`).

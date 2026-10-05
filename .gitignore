@@ -63,3 +63,7 @@ vite.config.*.timestamp*
 
 # Affinity keeps a lock file next to a design that is open
 *.af~lock~
+
+# Python bytecode (integrations/python)
+__pycache__/
+*.pyc

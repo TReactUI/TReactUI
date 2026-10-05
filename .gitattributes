@@ -1,0 +1,2 @@
+# The shim runs under Node on any system; a CRLF shebang line breaks it on Linux and macOS.
+packages/tty-node/bin/* text eol=lf

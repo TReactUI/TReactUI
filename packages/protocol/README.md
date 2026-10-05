@@ -32,6 +32,20 @@ takes a value, its choices, default and whether it is required). The page then s
 one with `run`; the backend runs only commands from its own list. A backend that serves one program never
 sends `commands`.
 
+## Schemas and conformance cases
+
+For an adapter in another language, the package ships what the parsers are checked against:
+
+- `schema/server-message.schema.json` and `schema/client-message.schema.json`: JSON Schema (2020-12), one per
+  direction, with the limits in them. Import them as `@treactui/protocol/schema/server-message.json` and
+  `@treactui/protocol/schema/client-message.json`.
+- `conformance/cases.json` (`@treactui/protocol/conformance/cases.json`): raw frames, their direction, and whether
+  each is valid. The TypeScript parsers, the schemas and the Go adapter all run the same list.
+
+[Integrating another language](../../docs/integrating-a-language.md) says how to use them. The schema is the
+contract a backend should meet; the browser's parser is slightly more lenient (it renders an unknown role as given,
+and reads any politeness other than `assertive` as `polite`).
+
 ## How this package is organised
 
 ```
