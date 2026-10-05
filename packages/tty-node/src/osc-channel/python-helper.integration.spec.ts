@@ -85,4 +85,15 @@ describeWithPython('the Python helper', () => {
     expect(result.stderr).toMatch(/OK\s*$/)
     expect(result.status).toBe(0)
   })
+
+  it('is used by the Python example app, whose unit tests pass against it', () => {
+    const result = spawnSync(python as string, ['-m', 'unittest', 'discover', '-s', '.', '-t', '.', '-p', 'test_*.py'], {
+      cwd:      join(PYTHON_FOLDER, '..', '..', 'examples', 'python-app'),
+      encoding: 'utf8',
+      env:      { ...process.env, PYTHONIOENCODING: 'utf8', PYTHONPATH: PYTHON_FOLDER },
+    })
+
+    expect(result.stderr).toMatch(/OK\s*$/)
+    expect(result.status).toBe(0)
+  })
 })
