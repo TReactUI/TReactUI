@@ -19,8 +19,10 @@ Node, so the React package and every backend adapter share one definition. The G
 | | `stop` | stop the running command |
 
 Each direction has an encoder (a mapper) and a parser (a validator that says why it rejects a
-frame). A selectable list is a `listbox` of `option` nodes: `aria-selected` is invalid on a
-`listitem`.
+frame). A selectable list is a `listbox` of `option` nodes (`aria-selected` is invalid on a `listitem`).
+`@treactui/tty` renders the described screen read-only, as a plain list with the selected item marked
+`aria-current`, because a screen reader reads a `listbox` as a single stop in browse mode; it also announces
+when the selected option changes.
 
 ## Commands
 

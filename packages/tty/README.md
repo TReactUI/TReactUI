@@ -14,7 +14,13 @@ from `a11y-snapshot` messages so assistive technology gets real ARIA instead of 
 scraped buffer. Your bundler must be able to import CSS (`@xterm/xterm/css/xterm.css`).
 
 Keyboard: the terminal captures Tab and most keys, so **Ctrl+Shift+M** hands focus
-back to the page.
+back to the page: into the described screen's region when the backend sends snapshots, otherwise onto the
+terminal's container, never the bare document (where a screen reader would stay in focus mode).
+
+Screen readers: when the selected option of a described screen changes, its name is announced. When a
+launched command ends, its outcome and the first lines of its output are the "Back to commands" button's
+description, and the full output is a labelled region of plain text. See `docs/accessibility.md`, which records
+what was verified with NVDA and what was not.
 
 ## Command launcher
 

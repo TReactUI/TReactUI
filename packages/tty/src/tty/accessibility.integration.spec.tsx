@@ -12,6 +12,7 @@ jest.mock('@xterm/xterm', () => ({
     options: Record<string, unknown> = {}
     cols = 80
     rows = 24
+    buffer = { active: { length: 1, getLine: () => ({ translateToString: () => '3... 2... 1... Liftoff!' }) } }
 
     open () {}
     loadAddon () {}
@@ -21,7 +22,7 @@ jest.mock('@xterm/xterm', () => ({
     blur () {}
     focus () {}
     dispose () {}
-    write () {}
+    write (_data?: string, callback?: () => void) { callback?.() }
   },
 }))
 jest.mock('@xterm/addon-fit', () => ({ FitAddon: class { fit () {} } }))
@@ -95,6 +96,8 @@ describe('accessibility (axe)', () => {
     deliver({ type: 'event', name: 'exit', payload: { exitCode: 0 } })
 
     expect(screen.getByRole('button', { name: 'Back to commands' })).toBeTruthy()
+    // The output is read from the terminal asynchronously and offered as its own region.
+    expect(await screen.findByRole('region', { name: 'Output of countdown' })).toBeTruthy()
     expect(await axe(container)).toHaveNoViolations()
   })
 })

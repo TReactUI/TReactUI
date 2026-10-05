@@ -1,0 +1,8 @@
+# label|keys|wait-ms
+2. Tab to the command select|{TAB}|1500
+3. Tab to the name field|{TAB}|1500
+4. Type a name|Ada|1200
+5. Enter runs greet|{ENTER}|6000
+6. Browse mode: Down from the button|{DOWN}|1800
+7. Browse mode: Down again|{DOWN}|1800
+8. Browse mode: Down again|{DOWN}|1800

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { SocketLike } from '../transport'
 import { TTY } from './tty.component'
 
@@ -7,6 +7,8 @@ jest.mock('@xterm/xterm', () => ({
     options: Record<string, unknown> = {}
     cols = 80
     rows = 24
+    // The terminal after `greet Ada`: mostly empty rows around one printed line.
+    buffer = { active: { length: 3, getLine: (row: number) => ({ translateToString: () => ['', 'Hello, Ada!', ''][row] ?? '' }) } }
 
     open () {}
     loadAddon () {}
@@ -16,7 +18,7 @@ jest.mock('@xterm/xterm', () => ({
     blur () {}
     focus () {}
     dispose () {}
-    write () {}
+    write (_data?: string, callback?: () => void) { callback?.() }
   },
 }))
 jest.mock('@xterm/addon-fit', () => ({ FitAddon: class { fit () {} } }))
@@ -78,7 +80,7 @@ describe('TTY with a command launcher', () => {
     ])
   })
 
-  it('keeps the output after the command exits, says how it ended and puts focus on the way back', () => {
+  it('says how the command ended, reads out what it printed, and puts focus on the way back', async () => {
     const backend = connectedSocket()
     render(<TTY url='ws://x' createSocket={() => backend.socket} />)
     backend.open()
@@ -89,11 +91,30 @@ describe('TTY with a command launcher', () => {
     backend.deliver({ type: 'event', name: 'exit', payload: { exitCode: 2 } })
 
     expect(screen.getByText('greet exited with code 2').getAttribute('role')).toBe('status')
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Back to commands' }))
+    // The output is read from the terminal asynchronously; focus waits for it, because a screen
+    // reader speaks a button's description when the button takes focus, not afterwards.
+    const back = screen.getByRole('button', { name: 'Back to commands' })
+    await waitFor(() => expect(document.activeElement).toBe(back))
+    const description = document.getElementById(back.getAttribute('aria-describedby') ?? '')
+    expect(description?.textContent).toBe('greet exited with code 2. Output: Hello, Ada!')
+    expect(screen.getByRole('region', { name: 'Output of greet' }).textContent).toBe('Hello, Ada!')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to commands' }))
+    fireEvent.click(back)
 
     expect(screen.getByRole('heading', { name: 'Run a command' })).toBeTruthy()
+  })
+
+  it('hides the terminal rows from assistive technology once the output is offered as text', async () => {
+    const backend = connectedSocket()
+    render(<TTY url='ws://x' createSocket={() => backend.socket} />)
+    backend.open()
+    backend.deliver({ type: 'commands', commands: [{ ...greet, arguments: [], options: [] }] })
+    fireEvent.click(screen.getByRole('button', { name: 'Run' }))
+    expect(screen.getByLabelText('Terminal').getAttribute('aria-hidden')).toBeNull()
+
+    backend.deliver({ type: 'event', name: 'exit', payload: { exitCode: 0 } })
+
+    await waitFor(() => expect(screen.getByLabelText('Terminal', { selector: '[aria-hidden="true"]' })).toBeTruthy())
   })
 
   it('stops the running command on request', () => {

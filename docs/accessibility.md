@@ -44,53 +44,92 @@ on black, WCAG AA needs 4.5:1 for normal text):
 | Key hint text `#94a3b8` | black | 8.2:1 |
 | Done item `#7c8ba1` | black | 6.1:1 (was `#64748b`, 4.41:1: fixed) |
 
-## Not verified: NVDA
+## NVDA: a scripted pass
 
-**NVDA has not been run against this.** It is a screen reader that a person runs on Windows, and nothing
-here has been heard through one. The structure is correct as far as axe and the browser's accessibility
-tree can tell (a labelled region, a `listbox` of `option`s with the selection, live regions, a labelled
-form), but how NVDA actually reads it, and in particular the questions marked **?** below, is unknown.
+Run on 2026-10-05 with **NVDA 2026.1.1** (portable copy, silent "no speech" synthesizer) and **Chrome** on
+Windows 11, driving the demo with real keystrokes. What NVDA *would have said* is read from its debug log
+(`--debug-logging`), line by line with the time it was spoken, so each action is paired with its speech.
+This verifies **what is announced**. It does **not** verify how pleasant it is to use (see the end).
 
-Setup: NVDA with Chrome or Firefox. Start `node examples/commander-cli/serve.js` and `nx serve demo`, open
-http://localhost:4200. For the single-program demo, stop that server and run
-`cd apps/demo-server && go run .` instead.
+### What it found, and what changed
 
-Record the NVDA version, the browser and the result in each row.
+| # | Found with NVDA | Now |
+|---|---|---|
+| 1 | After a launched command, NVDA said only `Back to commands button`. The outcome (`greet exited with code 0`) was lost because focus moved at the same moment; the output was reachable only by pressing Down into 64 xterm rows (`list with 64 items Hello, Ada!` then `blank` 63 times). | The outcome and a summary of the output are the button's description: `Back to commands button greet exited with code 0. Output: Hello, Ada!`. The output is also a labelled region of plain text (`Output of greet region Hello, Ada!`), and the empty terminal rows are hidden from assistive technology once it exists. Focus waits for the output to be read, because a screen reader speaks a button's description when it takes focus. |
+| 2 | Moving the selection in the list demo was silent (NVDA echoed only `blank`). | When the selected option changes, its name is announced about 110 ms after the key (`Press Ctrl+Shift+M to leave the terminal, open`). The first screen is not announced, nor a redraw that leaves the selection where it was. |
+| 3 | Ctrl+Shift+M left focus on the bare document: NVDA said `Demo document`, stayed in focus mode, and browse-mode keys (`h`, `r`, `l`, Down) did nothing. | Focus moves into the described screen's region (`Tasks region Tasks heading level 1 Tasks list …`), where browse mode works; with no described screen it lands on the terminal's container, never the bare document. |
+| 4 | The described list was a `listbox`, which NVDA reads as one stop in browse mode (options only read in focus mode), though pressing arrows on a read-only mirror does nothing. | It is rendered as a plain list of items, read one by one, with the selected item marked `aria-current` (`Press Ctrl+Shift+M to leave the terminal, open current`). |
+
+A mistake along the way, kept as a warning: giving the terminal's container (and the region) a permanent
+`tabindex="-1"` made NVDA stay in **browse mode** when the terminal's text field took focus, so arrow keys moved
+NVDA's cursor out of the terminal instead of reaching the program. `tabindex` is now set only at the moment
+focus is moved there.
+
+### What the scripted pass confirmed already worked
+
+- On load: `main landmark form Run a command heading level 2`.
+- The command select with its description: `Command combo box greet collapsed Print a greeting`.
+- A required field: `name (required) edit required who to greet blank`.
+- An empty submit is announced (`alert There is 1 problem`) and the field keeps focus.
+- After Run, focus is in the terminal (`Tasks terminal grouping`, `Terminal input edit`).
+- A change made with Space is announced through the live region (`…: done`).
+
+### To repeat it
+
+The driver and the step files are in [`tools/nvda`](../tools/nvda), with its README: a portable NVDA with a silent
+configuration, Chrome as an app window with `--force-renderer-accessibility`, keys sent with `SendKeys`, and the
+`Speaking [...]` lines read from NVDA's debug log. It takes over the keyboard for a few minutes while it runs.
+
+### Not verified
+
+- **How it feels** to someone who uses NVDA every day. A transcript shows what is spoken, not whether the flow is
+  natural, how it behaves at real speaking speed, or what a user's own settings change. A person who uses NVDA
+  should run the checklist below.
+- **Firefox, JAWS, Narrator, VoiceOver, TalkBack.** Only NVDA with Chrome was run.
+- **Long-running output.** During a run, xterm.js's own live region still speaks (`Too much output to announce,
+  navigate to rows manually to read`), and a program that prints continuously has not been tried.
+- **A test-driver artefact:** under `SendKeys`, the first Down after Tab did not move the selection in the list demo
+  (three runs, same every time), so announcements line up with the second press. A single ArrowDown sent by
+  Playwright did move it, so this is probably the driver, not the product; a human at a keyboard should confirm.
+- The `setup` flow with prompts, Stop, and the `countdown` command were not part of this scripted pass.
+
+## Manual checklist for a person using NVDA
+
+Record the NVDA version, the browser and the result in each row. `✓` marks what the scripted pass already showed.
 
 ### The launcher (commander CLI)
 
-| # | Do this | Expect | Result |
-|---|---|---|---|
-| 1 | Open the page | NVDA reads "Run a command" (focus moves to the heading) | ☐ |
-| 2 | Tab through the form | Each field is announced with its label; "name (required)"; the description of the command is read with the select | ☐ |
-| 3 | Run `greet` with no name | An alert says "There is 1 problem: name is required"; focus goes to the name field, announced as invalid | ☐ |
-| 4 | Fill in, press Run | The terminal takes focus; **?** the output is read, or can be read in browse mode | ☐ |
-| 5 | Command ends | "greet exited with code 0" is read; focus is on "Back to commands" | ☐ |
-| 6 | Run `countdown`, press Ctrl+Shift+M, Tab to Stop, Enter | Focus leaves the terminal; "countdown stopped" is read | ☐ |
-| 7 | Run `setup` | The prompts can be answered by keyboard; **?** NVDA reads the prompt text as it changes | ☐ |
-| 8 | After `setup` | "Setup finished for …" is announced (a polite live region) | ☐ |
+| # | Do this | Expect | Scripted pass | Result |
+|---|---|---|---|---|
+| 1 | Open the page | NVDA reads "Run a command" | ✓ | ☐ |
+| 2 | Tab through the form | Each field is announced with its label; "name (required)"; the command's description is read with the select | ✓ | ☐ |
+| 3 | Run `greet` with no name | An alert says "There is 1 problem: name is required"; the name field keeps focus | ✓ | ☐ |
+| 4 | Fill in, press Run | The terminal takes focus | ✓ | ☐ |
+| 5 | Command ends | "Back to commands button, greet exited with code 0. Output: Hello, Ada!" | ✓ | ☐ |
+| 6 | Press Down from the button | "Output of greet region", then the output as text | ✓ | ☐ |
+| 7 | Run `countdown`, press Ctrl+Shift+M, Tab to Stop, Enter | Focus leaves the terminal; "countdown stopped" | | ☐ |
+| 8 | Run `setup` | The prompts can be answered by keyboard; the prompt text is read as it changes | | ☐ |
+| 9 | After `setup` | "Setup finished for …" is announced | | ☐ |
 
 ### The single-program demo (a Bubble Tea list)
 
-| # | Do this | Expect | Result |
-|---|---|---|---|
-| 9 | Open the page, focus the terminal | The terminal is announced as "Terminal input" inside "Tasks terminal" | ☐ |
-| 10 | **?** Ctrl+Shift+M, then browse mode (NVDA+Space) | The hidden "Tasks" region is reachable: a list of options, the selected one marked | ☐ |
-| 11 | Back in the terminal, Down, Space | The change is announced ("… : done") through the live region | ☐ |
-| 12 | **?** Down arrow repeatedly | Whether the selected option is announced as the selection moves (it is a hidden list, not focus) | ☐ |
+| # | Do this | Expect | Scripted pass | Result |
+|---|---|---|---|---|
+| 10 | Tab into the terminal | "Tasks terminal grouping, Terminal input edit" | ✓ | ☐ |
+| 11 | Down / Up | The new selection is announced | ✓ | ☐ |
+| 12 | Space | The change is announced (`…: done`) | ✓ | ☐ |
+| 13 | Ctrl+Shift+M | "Tasks region, Tasks heading, Tasks list …"; focus is in browse mode | ✓ | ☐ |
+| 14 | Down arrow in browse mode | Each task is read in turn, the selected one as "current" | ✓ | ☐ |
 
 ### Keyboard
 
-| # | Do this | Expect | Result |
-|---|---|---|---|
-| 13 | Tab into the terminal, press Tab | Tab goes to the program (it is a terminal), so Tab alone cannot leave it | ☐ |
-| 14 | Press Ctrl+Shift+M | Focus leaves the terminal; Tab / Shift+Tab move through the page again | ☐ |
+| # | Do this | Expect | Scripted pass | Result |
+|---|---|---|---|---|
+| 15 | Tab into the terminal, press Tab | Tab goes to the program (it is a terminal), so Tab alone cannot leave it | | ☐ |
+| 16 | Press Ctrl+Shift+M | Focus leaves the terminal into the screen region (or the terminal's container), never the bare document | ✓ | ☐ |
 
-## Known design limits to watch for in NVDA
+## Known design limits
 
-- The accessibility layer is visually hidden and not focusable, so it is read in browse mode, not with
-  focus. Rows 10 and 12 decide whether that is enough or whether the selected option needs to be exposed
-  as focus (for instance `aria-activedescendant` on the terminal).
 - When a backend sends no snapshots, xterm.js's own screen-reader mode is on. It reads redrawing screens
   poorly; it suits append-only output.
 - Colours of the served program are its own; see the contrast table above for how to check them.

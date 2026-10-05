@@ -5,14 +5,19 @@ import { visuallyHidden } from './visually-hidden.style'
 export interface AccessibilityLayerProps {
   snapshot?:     A11ySnapshot
   announcement?: { text: string, politeness: Politeness }
+  /**
+   * An id for the screen's region, so a
+   * caller can move a screen reader into it (see `onEscape` on the terminal view).
+   */
+  regionId?:     string
 }
 
 /** A visually hidden, semantic twin of the terminal for screen readers. */
-export function AccessibilityLayer ({ snapshot, announcement }: AccessibilityLayerProps) {
+export function AccessibilityLayer ({ snapshot, announcement, regionId }: AccessibilityLayerProps) {
   return (
     <div style={visuallyHidden}>
       {snapshot !== undefined && (
-        <section aria-label={snapshot.title}>
+        <section id={regionId} aria-label={snapshot.title}>
           <h1>{snapshot.title}</h1>
           {/* eslint-disable-next-line @eslint-react/no-array-index-key -- nodes carry no id; the list is replaced wholesale on every snapshot */}
           {snapshot.nodes.map((node, index) => <A11yNodeView key={index} node={node} />)}

@@ -3,14 +3,17 @@ import { Terminal } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
 import { useEffect, useRef } from 'react'
 import { isFocusEscapeChord } from './focus-escape.policy'
+import { readBufferLines } from './read-buffer-lines.algorithm'
 import type { TerminalViewProps } from './terminal-view.contract'
 
 /** A real terminal (xterm.js, DOM renderer). */
-export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, focusOnMount = false, ariaLabel }: TerminalViewProps) {
+export function TerminalView ({
+  onReady, onInput, onResize, screenReaderMode, focusOnMount = false, onEscape, hiddenFromAssistiveTech = false, ariaLabel,
+}: TerminalViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<Terminal>(undefined)
-  const callbacksRef = useRef({ onReady, onInput, onResize })
-  callbacksRef.current = { onReady, onInput, onResize }
+  const callbacksRef = useRef({ onReady, onInput, onResize, onEscape })
+  callbacksRef.current = { onReady, onInput, onResize, onEscape }
   const screenReaderModeRef = useRef(screenReaderMode)
   screenReaderModeRef.current = screenReaderMode
   const focusOnMountRef = useRef(focusOnMount)
@@ -35,6 +38,12 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, fo
     terminal.attachCustomKeyEventHandler(event => {
       if (event.type === 'keydown' && isFocusEscapeChord(event)) {
         terminal.blur()
+        // Never leave focus on the bare document: a screen reader would stay in focus mode.
+        // The container is made focusable only now, so its normal accessibility tree is unchanged.
+        if (callbacksRef.current.onEscape?.() !== true) {
+          host.tabIndex = -1
+          host.focus()
+        }
 
         return false
       }
@@ -44,7 +53,11 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, fo
     terminal.onData(data => callbacksRef.current.onInput(data))
     terminal.onResize(({ cols, rows }) => callbacksRef.current.onResize(cols, rows))
     callbacksRef.current.onResize(terminal.cols, terminal.rows)
-    callbacksRef.current.onReady({ write: data => terminal.write(data) })
+    callbacksRef.current.onReady({
+      write:     data => terminal.write(data),
+      // An empty write completes after everything queued before it has been parsed.
+      readLines: async () => new Promise(resolve => terminal.write('', () => resolve(readBufferLines(terminal.buffer.active)))),
+    })
     if (focusOnMountRef.current) terminal.focus()
 
     return () => {
@@ -59,5 +72,13 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, fo
     if (terminalRef.current !== undefined) terminalRef.current.options.screenReaderMode = screenReaderMode
   }, [screenReaderMode])
 
-  return <div ref={containerRef} role='group' aria-label={ariaLabel} style={{ flex: 1, minHeight: 0 }} />
+  return (
+    <div
+      ref={containerRef}
+      role='group'
+      aria-label={ariaLabel}
+      aria-hidden={hiddenFromAssistiveTech ? true : undefined}
+      style={{ flex: 1, minHeight: 0 }}
+    />
+  )
 }

@@ -1,0 +1,13 @@
+# label|keys|wait-ms
+2. Tab into the terminal|{TAB}|2000
+3. Down arrow|{DOWN}|2000
+4. Down arrow|{DOWN}|2000
+5. Down arrow|{DOWN}|2000
+6. Space (toggle)| |2200
+7. Ctrl+Shift+M (leave the terminal)|^+m|2200
+8. Browse mode: Down (1)|{DOWN}|1600
+9. Browse mode: Down (2)|{DOWN}|1600
+10. Browse mode: Down (3)|{DOWN}|1600
+11. Browse mode: Down (4)|{DOWN}|1600
+12. Browse mode: Down (5)|{DOWN}|1600
+13. Browse mode: Down (6)|{DOWN}|1600

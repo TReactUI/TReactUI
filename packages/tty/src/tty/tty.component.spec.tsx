@@ -11,6 +11,7 @@ jest.mock('@xterm/xterm', () => ({
     options: Record<string, unknown> = {}
     cols = 80
     rows = 24
+    buffer = { active: { length: 0, getLine: () => undefined } }
 
     constructor (options: Record<string, unknown>) { constructed.push(options) }
     open () {}
@@ -21,7 +22,10 @@ jest.mock('@xterm/xterm', () => ({
     blur () {}
     focus () {}
     dispose () {}
-    write (data: string) { written.push(data) }
+    write (data: string, callback?: () => void) {
+      if (data !== '') written.push(data)
+      callback?.()
+    }
   },
 }))
 jest.mock('@xterm/addon-fit', () => ({
