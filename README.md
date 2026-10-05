@@ -106,6 +106,9 @@ Other combinations are in each example's README.
   the Python tests need Python 3.
 - **Every push to `main` can publish to public npm.** CI runs `nx release`, which versions and publishes the
   packages that have `feat` or `fix` commits since their last release.
+- **The Go adapter is released by tag.** `packages/tty-go` is its own Go module, and the *Release Go module*
+  workflow tags `packages/tty-go/vX.Y.Z` after CI passes, by the same rule (`tools/go-release`). `go.mod` at the
+  root belongs to the demo server and points at the adapter with a `replace`, so everything builds from source.
 - **Structure** is vertical feature slices: a folder per outcome with an `index.ts` as its whole public API, and
   files named for their role (`.use-case.ts`, `.contract.ts`, `.algorithm.ts`...). `npm run lint` enforces it.
 - The workspace is built with [Nx](https://nx.dev) and was scaffolded with MNCI.

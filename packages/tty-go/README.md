@@ -5,8 +5,13 @@ the browser for [`@treactui/tty`](../tty): the real terminal output over a
 WebSocket, plus the semantic information assistive technology needs.
 
 ```sh
-go get github.com/TReactUI/TReactUI/packages/tty-go
+go get github.com/TReactUI/TReactUI/packages/tty-go@latest
 ```
+
+It is a Go module of its own (`packages/tty-go/go.mod`), versioned by git tags named `packages/tty-go/vX.Y.Z`,
+independently of the npm packages. CI creates a tag after it has passed on `main`, when a `feat` or `fix` commit
+touched this folder since the last one (while the major version is 0, either bumps the patch; see
+`tools/go-release`). Pin a version in your `go.mod` as usual.
 
 ```go
 import ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
