@@ -12,6 +12,32 @@ await serveCommand({ command: 'node', args: ['cli.js', 'setup'], allowedOrigins:
 // ws://127.0.0.1:8080/term
 ```
 
+## Ink, in-process
+
+Ink accepts custom streams, so an Ink app can be served without a PTY or a native module. Pass the
+adapter's streams to your own `render`:
+
+```js
+import { serveInk } from '@trectui/tty-node'
+import { render } from 'ink'
+
+await serveInk({
+  render: ({ stdin, stdout, announce, publishSnapshot }) =>
+    render(<App announce={announce} />, { stdin, stdout, patchConsole: false, exitOnCtrlC: false }),
+})
+```
+
+Each browser gets its own instance, in this process. `announce`, `publishSnapshot` and `emitEvent`
+talk to the page directly, so no escape-sequence channel is needed. The adapter does not depend on
+Ink; it only needs `unmount()` and `waitUntilExit()` from what `render` returns.
+
+| | `serveCommand` (PTY) | `serveInk` (in-process) |
+|---|---|---|
+| Runs | any program, in a child process | an Ink app, in this process |
+| Native module | node-pty (prebuilt for Windows, macOS, Linux) | none |
+| Isolation | one OS process per browser | one React tree per browser; a crash is caught, a blocked event loop is shared |
+| Speaking to the page | the OSC channel (`announce`, `publishSnapshot`) | the session context |
+
 ## Security
 
 The endpoint runs programs, so it is closed by default:
@@ -50,8 +76,12 @@ src/
   osc-channel/         the program-to-adapter side channel: extractor (store) and publishers
   pty-session/         runs a command in a PTY for one transport
   websocket-server/    the HTTP/WebSocket server, origin policy and the ws transport
+  session-lifecycle/   what both session kinds share: hello, start at the browser's size, input queue, shutdown
+  ink-session/         runs an Ink app in-process on fake TTY streams
   serve-command/       serveTty + runPtySession: serve one program
+  serve-ink/           serveTty + runInkSession: serve one Ink app
 ```
 
-Dependencies point one way: `serve-command` → `pty-session`, `websocket-server` → `osc-channel`,
-`session-transport` → `@trectui/protocol`.
+Dependencies point one way: `serve-command`, `serve-ink` → `pty-session`, `ink-session`, `websocket-server`
+→ `session-lifecycle` → `session-transport`; `pty-session` also uses `osc-channel`. Everything speaks
+`@trectui/protocol`.
