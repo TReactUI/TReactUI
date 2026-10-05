@@ -60,3 +60,6 @@ vite.config.*.timestamp*
 !apps/*/.env.dev
 !apps/*/.env.uat
 !apps/*/.env.prod
+
+# Affinity keeps a lock file next to a design that is open
+*.af~lock~
