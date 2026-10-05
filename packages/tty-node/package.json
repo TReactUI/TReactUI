@@ -20,7 +20,7 @@
     "!**/*.js.map"
   ],
   "dependencies": {
-    "@trectui/protocol": "^0.0.1",
+    "@trectui/protocol": "~0.0.1",
     "node-pty": "^1.1.0",
     "ws": "^8.22.0"
   },
