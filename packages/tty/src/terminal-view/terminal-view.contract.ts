@@ -5,10 +5,15 @@ export interface TerminalHandle {
 
 export interface TerminalViewProps {
   /** Receives the handle once the terminal exists. */
-  onReady:    (handle: TerminalHandle) => void
+  onReady:          (handle: TerminalHandle) => void
   /** Keystrokes and pastes typed by the user. */
-  onInput:    (data: string) => void
+  onInput:          (data: string) => void
   /** The terminal's size in cells, on mount and after every change. */
-  onResize:   (cols: number, rows: number) => void
-  ariaLabel?: string
+  onResize:         (cols: number, rows: number) => void
+  /**
+   * Makes xterm.js expose its buffer to screen readers. Turn it off when a
+   * semantic layer describes the screen, or both are read.
+   */
+  screenReaderMode: boolean
+  ariaLabel?:       string
 }

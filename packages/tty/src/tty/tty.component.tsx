@@ -22,6 +22,7 @@ export function TTY ({ url, label = 'Terminal', className, onEvent, createSocket
     <div className={className}>
       <TerminalView
         ariaLabel={label}
+        screenReaderMode={snapshot === undefined}
         onReady={handle => { terminalRef.current = handle }}
         onInput={sendInput}
         onResize={sendResize}
