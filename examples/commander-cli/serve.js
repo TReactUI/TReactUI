@@ -2,13 +2,14 @@
 // a form built from the program's commands, arguments and options, then runs the one chosen.
 import { fileURLToPath } from 'node:url'
 import { serveCommander } from '@trectui/tty-node'
-import { program } from './program.js'
+import { createProgram } from './program.js'
 
+const program = createProgram()
 const server = await serveCommander({
   program,
-  command: process.execPath,
-  args: [fileURLToPath(new URL('cli.js', import.meta.url))],
-  port: 8080,
+  command:        process.execPath,
+  args:           [fileURLToPath(new URL('cli.js', import.meta.url))],
+  port:           8080,
   allowedOrigins: ['localhost:4200'],
 })
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import { program } from './program.js'
+import { createProgram } from './program.js'
 
-await program.parseAsync()
+await createProgram().parseAsync()

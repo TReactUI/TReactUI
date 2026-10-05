@@ -14,8 +14,8 @@ function App ({ announce, publishSnapshot }) {
   const describe = (index, done) => publishSnapshot({
     title: 'People',
     nodes: [{
-      role: 'listbox',
-      label: 'People',
+      role:     'listbox',
+      label:    'People',
       children: PEOPLE.map((name, i) => ({ role: 'option', label: done.includes(name) ? `${name}, greeted` : name, selected: i === index })),
     }],
   })
@@ -40,9 +40,9 @@ function App ({ announce, publishSnapshot }) {
 }
 
 const server = await serveInk({
-  port: 8080,
+  port:           8080,
   allowedOrigins: ['localhost:4200'],
-  render: ({ stdin, stdout, announce, publishSnapshot }) =>
+  render:         ({ stdin, stdout, announce, publishSnapshot }) =>
     render(h(App, { announce, publishSnapshot }), { stdin, stdout, patchConsole: false, exitOnCtrlC: false }),
 })
 
