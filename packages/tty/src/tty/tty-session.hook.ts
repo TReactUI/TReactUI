@@ -20,6 +20,8 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
   const [snapshot, setSnapshot] = useState<A11ySnapshot>()
   const [announcement, setAnnouncement] = useState<TtySession['announcement']>()
   const connectionRef = useRef<TtyConnection>(undefined)
+  // The terminal reports its size before the connection exists; keep the latest to send on connect.
+  const sizeRef = useRef<{ cols: number, rows: number }>(undefined)
   const handlersRef = useRef({ onEvent, onOutput })
   handlersRef.current = { onEvent, onOutput }
 
@@ -52,6 +54,7 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
       },
     })
     connectionRef.current = opened
+    if (sizeRef.current !== undefined) opened.send({ type: 'resize', ...sizeRef.current })
 
     return () => {
       opened.close()
@@ -60,7 +63,10 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
   }, [url, createSocket])
 
   const sendInput = useCallback((data: string) => connectionRef.current?.send({ type: 'input', data }), [])
-  const sendResize = useCallback((cols: number, rows: number) => connectionRef.current?.send({ type: 'resize', cols, rows }), [])
+  const sendResize = useCallback((cols: number, rows: number) => {
+    sizeRef.current = { cols, rows }
+    connectionRef.current?.send({ type: 'resize', cols, rows })
+  }, [])
 
   return { snapshot, announcement, sendInput, sendResize }
 }

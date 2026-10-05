@@ -19,7 +19,7 @@ export function TTY ({ url, label = 'Terminal', className, onEvent, createSocket
   })
 
   return (
-    <div className={className}>
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <TerminalView
         ariaLabel={label}
         screenReaderMode={snapshot === undefined}

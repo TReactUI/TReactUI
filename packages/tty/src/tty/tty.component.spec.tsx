@@ -3,6 +3,7 @@ import type { SocketLike } from '../transport'
 import { TTY } from './tty.component'
 
 const written: string[] = []
+const fitCalls = { count: 0 }
 const constructed: Array<Record<string, unknown>> = []
 
 jest.mock('@xterm/xterm', () => ({
@@ -13,12 +14,18 @@ jest.mock('@xterm/xterm', () => ({
 
     constructor (options: Record<string, unknown>) { constructed.push(options) }
     open () {}
+    loadAddon () {}
     attachCustomKeyEventHandler () {}
     onData () {}
     onResize () {}
     blur () {}
     dispose () {}
     write (data: string) { written.push(data) }
+  },
+}))
+jest.mock('@xterm/addon-fit', () => ({
+  FitAddon: class {
+    fit () { fitCalls.count++ }
   },
 }))
 jest.mock('@xterm/xterm/css/xterm.css', () => ({}), { virtual: true })
@@ -54,4 +61,38 @@ describe('TTY', () => {
 
     expect(constructed.at(-1)).toMatchObject({ convertEol: true })
   })
+
+  it('fits the terminal on mount and whenever its container is resized', () => {
+    let notifyResize: () => void = noop
+    class FakeResizeObserver {
+      constructor (callback: () => void) { notifyResize = callback }
+      observe () {}
+      disconnect () {}
+    }
+    stubGlobal('ResizeObserver', FakeResizeObserver)
+    const socket: SocketLike = { send: jest.fn(), close: jest.fn(), addEventListener: jest.fn() }
+    fitCalls.count = 0
+    render(<TTY url='ws://x' createSocket={() => socket} />)
+    expect(fitCalls.count).toBe(1)
+
+    notifyResize()
+
+    expect(fitCalls.count).toBe(2)
+  })
+
+  it('sends the initial terminal size once connected, even though it is known before the connection', () => {
+    const send = jest.fn()
+    const socket: SocketLike = { send, close: jest.fn(), addEventListener: jest.fn() }
+    render(<TTY url='ws://x' createSocket={() => socket} />)
+
+    // Frames queue until the socket opens, so open it by invoking the registered listener.
+    const openListener = (socket.addEventListener as jest.Mock).mock.calls.find(call => call[0] === 'open')?.[1]
+    openListener()
+
+    expect(send).toHaveBeenCalledWith('{"type":"resize","cols":80,"rows":24}')
+  })
 })
+
+function stubGlobal (name: string, value: unknown): void {
+  Object.defineProperty(globalThis, name, { value, configurable: true, writable: true })
+}

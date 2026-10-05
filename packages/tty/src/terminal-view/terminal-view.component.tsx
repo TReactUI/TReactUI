@@ -1,3 +1,4 @@
+import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
 import { useEffect, useRef } from 'react'
@@ -21,7 +22,14 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, ar
     // such as Bubble Tea rely on that; without it the cursor keeps its column.
     const terminal = new Terminal({ convertEol: true, screenReaderMode: screenReaderModeRef.current, cursorBlink: true })
     terminalRef.current = terminal
+    const fit = new FitAddon()
+    terminal.loadAddon(fit)
     terminal.open(host)
+    fit.fit()
+    // Fits whenever the container changes size, which covers window resizes too;
+    // the terminal's own onResize then tells the backend the new cell size.
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => fit.fit())
+    observer?.observe(host)
     terminal.attachCustomKeyEventHandler(event => {
       if (event.type === 'keydown' && isFocusEscapeChord(event)) {
         terminal.blur()
@@ -37,6 +45,7 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, ar
     callbacksRef.current.onReady({ write: data => terminal.write(data) })
 
     return () => {
+      observer?.disconnect()
       terminal.dispose()
       terminalRef.current = undefined
     }
@@ -46,5 +55,5 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, ar
     if (terminalRef.current !== undefined) terminalRef.current.options.screenReaderMode = screenReaderMode
   }, [screenReaderMode])
 
-  return <div ref={containerRef} aria-label={ariaLabel} />
+  return <div ref={containerRef} aria-label={ariaLabel} style={{ flex: 1, minHeight: 0 }} />
 }
