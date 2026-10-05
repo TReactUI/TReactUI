@@ -61,6 +61,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6.0.0",
     "adm-zip": "^0.6.1",
+    "ajv": "^8.20.0",
     "axe-core": "^4.13.0",
     "babel-jest": "~30.3.0",
     "core-js": "^3.36.1",

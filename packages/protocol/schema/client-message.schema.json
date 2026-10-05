@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:treactui:schema:client-message",
+  "title": "Client message",
+  "description": "A message from the browser to a backend: one JSON text frame over the WebSocket. A backend must treat these as untrusted input and enforce the limits below. Lengths are counted in characters here; implementations may count UTF-16 units or bytes, so a backend should leave itself margin rather than rely on the exact boundary for non-ASCII text.",
+  "type": "object",
+  "required": ["type"],
+  "oneOf": [
+    { "$ref": "#/$defs/input" },
+    { "$ref": "#/$defs/resize" },
+    { "$ref": "#/$defs/run" },
+    { "$ref": "#/$defs/stop" }
+  ],
+  "$defs": {
+    "input": {
+      "description": "Keystrokes or a paste, to be written to the program's input as is.",
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": { "const": "input" },
+        "data": { "type": "string" }
+      }
+    },
+    "resize": {
+      "description": "The terminal's size in cells. A terminal larger than 1000 cells either way is a mistake or an attack, not a screen.",
+      "type": "object",
+      "required": ["type", "cols", "rows"],
+      "properties": {
+        "type": { "const": "resize" },
+        "cols": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "rows": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      }
+    },
+    "run": {
+      "description": "Runs one of the commands the backend offered (a `commands` message). It becomes a process command line, so it is bounded and free of NUL; pass it to the program as an argument list, never through a shell, and refuse a command that was not offered.",
+      "type": "object",
+      "required": ["type", "command", "args"],
+      "properties": {
+        "type": { "const": "run" },
+        "command": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\\u0000]*$" },
+        "args": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "type": "string", "maxLength": 10000, "pattern": "^[^\\u0000]*$" }
+        }
+      }
+    },
+    "stop": {
+      "description": "Stops the running command.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "stop" }
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "description": "Conformance cases for the @treactui wire protocol. Every adapter and every parser should agree with `valid` on each case. A case is either a `message` (a JSON value the runner serialises) or a `raw` string (sent as is, for input that is not JSON). `direction` is `server` (backend to browser, schema/server-message.schema.json) or `client` (browser to backend, schema/client-message.schema.json). `skip` lists checks a case does not apply to: `go-roundtrip` (the Go encoder omits empty/false fields, so it cannot reproduce an input that spells them out).",
+  "cases": [
+    { "name": "hello", "direction": "server", "valid": true, "message": { "type": "hello", "version": 1 } },
+    { "name": "output with ANSI and line ends", "direction": "server", "valid": true, "message": { "type": "output", "data": "\u001b[1mhi\u001b[0m\r\n" } },
+    { "name": "output with non-ASCII text", "direction": "server", "valid": true, "message": { "type": "output", "data": "↑/↓ move · 日本語 🔊" } },
+    { "name": "snapshot with no nodes", "direction": "server", "valid": true, "message": { "type": "a11y-snapshot", "snapshot": { "title": "Tasks", "nodes": [] } } },
+    {
+      "name": "snapshot with a nested list, a selection and a progress bar",
+      "direction": "server",
+      "valid": true,
+      "message": {
+        "type": "a11y-snapshot",
+        "snapshot": {
+          "title": "Downloads",
+          "nodes": [
+            { "role": "heading", "value": "Queue" },
+            {
+              "role": "listbox",
+              "label": "Queue",
+              "children": [
+                { "role": "option", "label": "Song A", "selected": true, "focused": true },
+                { "role": "option", "label": "Song B" }
+              ]
+            },
+            { "role": "progressbar", "label": "Progress", "valueNow": 42.5 },
+            { "role": "textbox", "label": "URL", "value": "https://example.com" }
+          ]
+        }
+      }
+    },
+    { "name": "announce, polite", "direction": "server", "valid": true, "message": { "type": "announce", "text": "Saved", "politeness": "polite" } },
+    { "name": "announce, assertive", "direction": "server", "valid": true, "message": { "type": "announce", "text": "Failed", "politeness": "assertive" } },
+    { "name": "announce without politeness (read as polite)", "direction": "server", "valid": true, "message": { "type": "announce", "text": "Saved" } },
+    { "name": "event with a payload", "direction": "server", "valid": true, "message": { "type": "event", "name": "exit", "payload": { "exitCode": 0 } } },
+    { "name": "event without a payload", "direction": "server", "valid": true, "message": { "type": "event", "name": "open-file" } },
+    { "name": "commands, none", "direction": "server", "valid": true, "message": { "type": "commands", "commands": [] } },
+    {
+      "name": "commands with arguments, options, choices and defaults",
+      "direction": "server",
+      "valid": true,
+      "message": {
+        "type": "commands",
+        "commands": [
+          {
+            "name": "greet",
+            "description": "Print a greeting",
+            "arguments": [
+              { "name": "name", "description": "who to greet", "required": true, "variadic": false },
+              { "name": "more", "required": false, "variadic": true }
+            ],
+            "options": [
+              { "flag": "--shout", "short": "-s", "description": "greet loudly", "takesValue": false, "required": false },
+              { "flag": "--mode", "valueName": "mode", "takesValue": true, "choices": ["a", "b"], "defaultValue": "a", "required": true }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "a command that leaves the optional booleans out",
+      "direction": "server",
+      "valid": true,
+      "skip": ["go-roundtrip"],
+      "message": { "type": "commands", "commands": [{ "name": "countdown", "arguments": [{ "name": "seconds" }], "options": [{ "flag": "--fast" }] }] }
+    },
+
+    { "name": "server: not JSON", "direction": "server", "valid": false, "raw": "nope" },
+    { "name": "server: JSON but not an object", "direction": "server", "valid": false, "message": [] },
+    { "name": "server: no type", "direction": "server", "valid": false, "message": {} },
+    { "name": "server: unknown type", "direction": "server", "valid": false, "message": { "type": "zap" } },
+    { "name": "server: hello without a version", "direction": "server", "valid": false, "message": { "type": "hello" } },
+    { "name": "server: output without data", "direction": "server", "valid": false, "message": { "type": "output" } },
+    { "name": "server: output data is not a string", "direction": "server", "valid": false, "message": { "type": "output", "data": 5 } },
+    { "name": "server: snapshot without nodes", "direction": "server", "valid": false, "message": { "type": "a11y-snapshot", "snapshot": { "title": "x" } } },
+    { "name": "server: snapshot without a title", "direction": "server", "valid": false, "message": { "type": "a11y-snapshot", "snapshot": { "nodes": [] } } },
+    { "name": "server: snapshot nodes is not a list", "direction": "server", "valid": false, "message": { "type": "a11y-snapshot", "snapshot": { "title": "x", "nodes": {} } } },
+    { "name": "server: snapshot node without a role", "direction": "server", "valid": false, "message": { "type": "a11y-snapshot", "snapshot": { "title": "x", "nodes": [{ "label": "no role" }] } } },
+    { "name": "server: snapshot child without a role", "direction": "server", "valid": false, "message": { "type": "a11y-snapshot", "snapshot": { "title": "x", "nodes": [{ "role": "list", "children": [{ "label": "no role" }] }] } } },
+    { "name": "server: announce without text", "direction": "server", "valid": false, "message": { "type": "announce", "politeness": "polite" } },
+    { "name": "server: event without a name", "direction": "server", "valid": false, "message": { "type": "event", "payload": {} } },
+    { "name": "server: commands is not a list", "direction": "server", "valid": false, "message": { "type": "commands", "commands": {} } },
+    { "name": "server: a command without a name", "direction": "server", "valid": false, "message": { "type": "commands", "commands": [{ "arguments": [], "options": [] }] } },
+    { "name": "server: a command without its lists", "direction": "server", "valid": false, "message": { "type": "commands", "commands": [{ "name": "x" }] } },
+    { "name": "server: an argument without a name", "direction": "server", "valid": false, "message": { "type": "commands", "commands": [{ "name": "x", "arguments": [{ "required": true }], "options": [] }] } },
+    { "name": "server: an option without a flag", "direction": "server", "valid": false, "message": { "type": "commands", "commands": [{ "name": "x", "arguments": [], "options": [{ "takesValue": true }] }] } },
+
+    { "name": "input", "direction": "client", "valid": true, "message": { "type": "input", "data": "a" } },
+    { "name": "input that is an escape sequence", "direction": "client", "valid": true, "message": { "type": "input", "data": "\u001b[B" } },
+    { "name": "resize", "direction": "client", "valid": true, "message": { "type": "resize", "cols": 80, "rows": 24 } },
+    { "name": "resize at the smallest size", "direction": "client", "valid": true, "message": { "type": "resize", "cols": 1, "rows": 1 } },
+    { "name": "resize at the largest size", "direction": "client", "valid": true, "message": { "type": "resize", "cols": 1000, "rows": 1000 } },
+    { "name": "run with arguments", "direction": "client", "valid": true, "message": { "type": "run", "command": "greet", "args": ["--shout", "Ada Lovelace"] } },
+    { "name": "run with no arguments", "direction": "client", "valid": true, "message": { "type": "run", "command": "countdown", "args": [] } },
+    { "name": "run of a nested command", "direction": "client", "valid": true, "message": { "type": "run", "command": "remote add", "args": ["origin"] } },
+    { "name": "stop", "direction": "client", "valid": true, "message": { "type": "stop" } },
+
+    { "name": "client: not JSON", "direction": "client", "valid": false, "raw": "nope" },
+    { "name": "client: JSON but not an object", "direction": "client", "valid": false, "message": [] },
+    { "name": "client: no type", "direction": "client", "valid": false, "message": {} },
+    { "name": "client: unknown type", "direction": "client", "valid": false, "message": { "type": "zap" } },
+    { "name": "client: input without data", "direction": "client", "valid": false, "message": { "type": "input" } },
+    { "name": "client: input data is not a string", "direction": "client", "valid": false, "message": { "type": "input", "data": 5 } },
+    { "name": "client: resize with zero columns", "direction": "client", "valid": false, "message": { "type": "resize", "cols": 0, "rows": 24 } },
+    { "name": "client: resize past the limit", "direction": "client", "valid": false, "message": { "type": "resize", "cols": 1001, "rows": 24 } },
+    { "name": "client: resize with a fractional size", "direction": "client", "valid": false, "message": { "type": "resize", "cols": 80.5, "rows": 24 } },
+    { "name": "client: resize with a string size", "direction": "client", "valid": false, "message": { "type": "resize", "cols": "80", "rows": 24 } },
+    { "name": "client: resize without rows", "direction": "client", "valid": false, "message": { "type": "resize", "cols": 80 } },
+    { "name": "client: run without a command", "direction": "client", "valid": false, "message": { "type": "run", "args": [] } },
+    { "name": "client: run with an empty command", "direction": "client", "valid": false, "message": { "type": "run", "command": "", "args": [] } },
+    { "name": "client: run without args", "direction": "client", "valid": false, "message": { "type": "run", "command": "x" } },
+    { "name": "client: run args is not a list", "direction": "client", "valid": false, "message": { "type": "run", "command": "x", "args": "y" } },
+    { "name": "client: run with a non-string argument", "direction": "client", "valid": false, "message": { "type": "run", "command": "x", "args": [1] } },
+    { "name": "client: run with a NUL in the command", "direction": "client", "valid": false, "message": { "type": "run", "command": "a\u0000b", "args": [] } },
+    { "name": "client: run with a NUL in an argument", "direction": "client", "valid": false, "message": { "type": "run", "command": "x", "args": ["a\u0000b"] } }
+  ]
+}

@@ -50,26 +50,41 @@ func EncodeServerFrame(frame ServerFrame) ([]byte, error) {
 // DecodeClientMessage accepts a text frame only when it is a well-formed
 // client message, and says why otherwise.
 func DecodeClientMessage(frame []byte) (ClientMessage, error) {
-	var msg ClientMessage
-	if err := json.Unmarshal(frame, &msg); err != nil {
+	// Pointers, so that a field that is missing is told apart from one that is empty or zero.
+	var raw struct {
+		Type    string    `json:"type"`
+		Data    *string   `json:"data"`
+		Cols    *int      `json:"cols"`
+		Rows    *int      `json:"rows"`
+		Command *string   `json:"command"`
+		Args    *[]string `json:"args"`
+	}
+	if err := json.Unmarshal(frame, &raw); err != nil {
 		return ClientMessage{}, fmt.Errorf("frame is not valid JSON: %w", err)
 	}
-	switch msg.Type {
+	switch raw.Type {
 	case "input":
-		return msg, nil
+		if raw.Data == nil {
+			return ClientMessage{}, fmt.Errorf("input needs string data")
+		}
+		return ClientMessage{Type: raw.Type, Data: *raw.Data}, nil
 	case "resize":
-		if !validCells(msg.Cols) || !validCells(msg.Rows) {
+		if raw.Cols == nil || raw.Rows == nil || !validCells(*raw.Cols) || !validCells(*raw.Rows) {
 			return ClientMessage{}, fmt.Errorf("resize needs whole cols and rows between 1 and %d", maxCells)
 		}
-		return msg, nil
+		return ClientMessage{Type: raw.Type, Cols: *raw.Cols, Rows: *raw.Rows}, nil
 	case "run":
+		if raw.Command == nil || raw.Args == nil {
+			return ClientMessage{}, fmt.Errorf("run needs a command and a list of arguments")
+		}
+		msg := ClientMessage{Type: raw.Type, Command: *raw.Command, Args: *raw.Args}
 		if err := validateRun(msg); err != nil {
 			return ClientMessage{}, err
 		}
 		return msg, nil
 	case "stop":
-		return msg, nil
+		return ClientMessage{Type: raw.Type}, nil
 	default:
-		return ClientMessage{}, fmt.Errorf("unknown message type %q", msg.Type)
+		return ClientMessage{}, fmt.Errorf("unknown message type %q", raw.Type)
 	}
 }

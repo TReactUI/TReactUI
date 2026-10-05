@@ -8,6 +8,15 @@ export type ParsedServerMessage =
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+/** A node needs a role; its children, if any, must be nodes too. Unknown roles are let through and rendered as given. */
+const isNode = (value: unknown): boolean =>
+  isRecord(value) &&
+  typeof value['role'] === 'string' &&
+  (value['children'] === undefined || (Array.isArray(value['children']) && value['children'].every(child => isNode(child))))
+
+const isSnapshot = (value: unknown): boolean =>
+  isRecord(value) && typeof value['title'] === 'string' && Array.isArray(value['nodes']) && value['nodes'].every(node => isNode(node))
+
 /** Accepts a text frame only when it is a well-formed {@link ServerMessage}, and says why otherwise. */
 export function parseServerMessage (frame: string): ParsedServerMessage {
   let raw: unknown
@@ -32,9 +41,9 @@ export function parseServerMessage (frame: string): ParsedServerMessage {
         : { ok: false, reason: 'output needs string data' }
     }
     case 'a11y-snapshot': {
-      return isRecord(raw['snapshot']) && Array.isArray(raw['snapshot']['nodes'])
+      return isSnapshot(raw['snapshot'])
         ? { ok: true, message: { type: 'a11y-snapshot', snapshot: raw['snapshot'] as never } }
-        : { ok: false, reason: 'a11y-snapshot needs a snapshot with nodes' }
+        : { ok: false, reason: 'a11y-snapshot needs a snapshot with a title and nodes that have roles' }
     }
     case 'announce': {
       return typeof raw['text'] === 'string'

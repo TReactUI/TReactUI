@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:treactui:schema:server-message",
+  "title": "Server message",
+  "description": "A message from a backend to the browser: one JSON text frame over the WebSocket. Properties not listed here are ignored by the browser, so a backend may add its own. This schema is the contract a backend should meet; the browser's parser is a little more lenient (it renders a node with an unknown role as given, and reads any politeness other than \"assertive\" as \"polite\").",
+  "type": "object",
+  "required": ["type"],
+  "oneOf": [
+    { "$ref": "#/$defs/hello" },
+    { "$ref": "#/$defs/output" },
+    { "$ref": "#/$defs/a11ySnapshotMessage" },
+    { "$ref": "#/$defs/announce" },
+    { "$ref": "#/$defs/event" },
+    { "$ref": "#/$defs/commands" }
+  ],
+  "$defs": {
+    "hello": {
+      "description": "Sent first. Carries the protocol version.",
+      "type": "object",
+      "required": ["type", "version"],
+      "properties": {
+        "type": { "const": "hello" },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "output": {
+      "description": "Terminal output (ANSI), to be written to the terminal as is.",
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": { "const": "output" },
+        "data": { "type": "string" }
+      }
+    },
+    "a11ySnapshotMessage": {
+      "description": "A description of what the screen currently shows, for assistive technology.",
+      "type": "object",
+      "required": ["type", "snapshot"],
+      "properties": {
+        "type": { "const": "a11y-snapshot" },
+        "snapshot": { "$ref": "#/$defs/a11ySnapshot" }
+      }
+    },
+    "a11ySnapshot": {
+      "type": "object",
+      "required": ["title", "nodes"],
+      "properties": {
+        "title": { "type": "string" },
+        "nodes": { "type": "array", "items": { "$ref": "#/$defs/a11yNode" } }
+      }
+    },
+    "a11yNode": {
+      "type": "object",
+      "required": ["role"],
+      "properties": {
+        "role": {
+          "enum": ["heading", "list", "listitem", "listbox", "option", "button", "textbox", "progressbar", "status", "text"]
+        },
+        "label": { "type": "string" },
+        "value": { "type": "string" },
+        "valueNow": { "type": "number", "description": "Progress as a percentage, for a progressbar." },
+        "selected": { "type": "boolean" },
+        "focused": { "type": "boolean" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/a11yNode" } }
+      }
+    },
+    "announce": {
+      "description": "Makes a screen reader read the text aloud.",
+      "type": "object",
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "announce" },
+        "text": { "type": "string" },
+        "politeness": { "enum": ["polite", "assertive"], "default": "polite" }
+      }
+    },
+    "event": {
+      "description": "A web-only action for the host page, such as a file picker, or the program's exit.",
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "const": "event" },
+        "name": { "type": "string" },
+        "payload": {}
+      }
+    },
+    "commands": {
+      "description": "The commands the browser may run. The page then offers a launcher and starts one with a `run` message.",
+      "type": "object",
+      "required": ["type", "commands"],
+      "properties": {
+        "type": { "const": "commands" },
+        "commands": { "type": "array", "items": { "$ref": "#/$defs/commandSpec" } }
+      }
+    },
+    "commandSpec": {
+      "type": "object",
+      "required": ["name", "arguments", "options"],
+      "properties": {
+        "name": { "type": "string", "description": "What the user types: `greet`, or `remote add` for a nested command." },
+        "description": { "type": "string" },
+        "arguments": { "type": "array", "items": { "$ref": "#/$defs/argumentSpec" } },
+        "options": { "type": "array", "items": { "$ref": "#/$defs/optionSpec" } }
+      }
+    },
+    "argumentSpec": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "required": { "type": "boolean", "default": false },
+        "variadic": { "type": "boolean", "default": false },
+        "defaultValue": { "type": "string" },
+        "choices": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "optionSpec": {
+      "type": "object",
+      "required": ["flag"],
+      "properties": {
+        "flag": { "type": "string", "description": "The long form with its dashes (`--shout`), or the short form when there is no long one." },
+        "short": { "type": "string" },
+        "description": { "type": "string" },
+        "takesValue": { "type": "boolean", "default": false },
+        "valueName": { "type": "string" },
+        "defaultValue": { "type": "string" },
+        "choices": { "type": "array", "items": { "type": "string" } },
+        "required": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

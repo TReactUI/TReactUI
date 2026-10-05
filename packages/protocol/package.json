@@ -11,10 +11,15 @@
       "types": "./dist/src/index.d.ts",
       "import": "./dist/index.esm.js",
       "default": "./dist/index.esm.js"
-    }
+    },
+    "./schema/server-message.json": "./schema/server-message.schema.json",
+    "./schema/client-message.json": "./schema/client-message.schema.json",
+    "./conformance/cases.json": "./conformance/cases.json"
   },
   "files": [
     "dist",
+    "schema",
+    "conformance/cases.json",
     "!**/*.tsbuildinfo",
     "!**/*.d.ts.map",
     "!**/*.js.map"
