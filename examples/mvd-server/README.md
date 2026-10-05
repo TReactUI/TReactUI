@@ -43,3 +43,5 @@ real MVD settings or list.
   second window, shows the screen as it was, and a download run keeps going while no page is open. Anyone's
   keystrokes reach the program, and the screen has the size of the latest resize. When the user quits the
   setup screens the program ends, and the next page to connect starts a fresh one.
+- **Mouse and paste** (`Options.Mouse`): a click on a key bar entry presses its key, a click selects a
+  setting, a playlist or an entry, and the wheel scrolls. Pasting several lines of URLs into the list works.

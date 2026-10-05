@@ -14,7 +14,7 @@ import (
 // Run drives a fresh program from newModel over t until the browser leaves or
 // the program quits. Keystrokes arrive as terminal input, resizes as
 // tea.WindowSizeMsg, and the program's output goes back as output frames.
-func Run(ctx context.Context, t Transport, newModel func() tea.Model) error {
+func Run(ctx context.Context, t Transport, newModel func() tea.Model, options ...Option) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -33,10 +33,12 @@ func Run(ctx context.Context, t Transport, newModel func() tea.Model) error {
 	input, typed := io.Pipe()
 	program := tea.NewProgram(
 		observer.Observe(newModel(), send),
-		tea.WithInput(input),
-		tea.WithOutput(outputWriter(func(p []byte) { send(protocol.NewOutputFrame(string(p))) })),
-		tea.WithContext(ctx),
-		tea.WithoutSignalHandler(),
+		append(newSettings(options).programOptions(),
+			tea.WithInput(input),
+			tea.WithOutput(outputWriter(func(p []byte) { send(protocol.NewOutputFrame(string(p))) })),
+			tea.WithContext(ctx),
+			tea.WithoutSignalHandler(),
+		)...,
 	)
 
 	finished := make(chan error, 1)

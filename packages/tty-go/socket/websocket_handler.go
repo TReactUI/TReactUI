@@ -18,6 +18,8 @@ type Options struct {
 	// from the same host may connect: the endpoint runs a program, so a
 	// foreign page must not be able to open it.
 	AllowedOrigins []string
+	// Mouse turns mouse reporting on, so the program receives tea.MouseMsg.
+	Mouse bool
 }
 
 // Handler upgrades each request to a WebSocket and runs a fresh program on it.
@@ -28,7 +30,11 @@ func Handler(newModel func() tea.Model, options Options) http.Handler {
 			return
 		}
 		defer func() { _ = conn.CloseNow() }()
-		_ = session.Run(r.Context(), webSocketTransport{conn}, newModel)
+		var sessionOptions []session.Option
+		if options.Mouse {
+			sessionOptions = append(sessionOptions, session.WithMouse())
+		}
+		_ = session.Run(r.Context(), webSocketTransport{conn}, newModel, sessionOptions...)
 		_ = conn.Close(websocket.StatusNormalClosure, "")
 	})
 }

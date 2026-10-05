@@ -26,14 +26,15 @@ const terminalPreamble = "\x1b[?25l\x1b[?2004h"
 // keystrokes reach the program.
 type SharedProgram struct {
 	newModel func() tea.Model
+	settings settings
 
 	mu      sync.Mutex
 	running *sharedRun
 }
 
 // NewSharedProgram prepares a shared program; newModel is called each time one starts.
-func NewSharedProgram(newModel func() tea.Model) *SharedProgram {
-	return &SharedProgram{newModel: newModel}
+func NewSharedProgram(newModel func() tea.Model, options ...Option) *SharedProgram {
+	return &SharedProgram{newModel: newModel, settings: newSettings(options)}
 }
 
 // Attach connects one browser to the program, starting it if none is running,
@@ -81,13 +82,15 @@ func (s *SharedProgram) start() *sharedRun {
 	}
 
 	input, typed := io.Pipe()
-	run := &sharedRun{typed: typed, viewers: map[*sharedViewer]struct{}{}, finished: make(chan struct{})}
+	run := &sharedRun{typed: typed, preamble: s.settings.preamble(), viewers: map[*sharedViewer]struct{}{}, finished: make(chan struct{})}
 	run.program = tea.NewProgram(
 		observer.Observe(s.newModel(), run.broadcast),
-		tea.WithInput(input),
-		tea.WithOutput(outputWriter(func(p []byte) { run.broadcast(protocol.NewOutputFrame(string(p))) })),
-		tea.WithContext(context.Background()),
-		tea.WithoutSignalHandler(),
+		append(s.settings.programOptions(),
+			tea.WithInput(input),
+			tea.WithOutput(outputWriter(func(p []byte) { run.broadcast(protocol.NewOutputFrame(string(p))) })),
+			tea.WithContext(context.Background()),
+			tea.WithoutSignalHandler(),
+		)...,
 	)
 	s.running = run
 
@@ -108,6 +111,7 @@ func (s *SharedProgram) start() *sharedRun {
 type sharedRun struct {
 	program  *tea.Program
 	typed    *io.PipeWriter
+	preamble string
 	finished chan struct{}
 
 	mu       sync.Mutex // guards what follows, and serialises writes to the browsers
@@ -127,7 +131,7 @@ type sharedViewer struct {
 func (r *sharedRun) join(v *sharedViewer) {
 	r.mu.Lock()
 	r.sendTo(v, protocol.NewHelloFrame())
-	r.sendTo(v, protocol.NewOutputFrame(terminalPreamble))
+	r.sendTo(v, protocol.NewOutputFrame(r.preamble))
 	if r.snapshot != nil {
 		r.sendTo(v, *r.snapshot)
 	}

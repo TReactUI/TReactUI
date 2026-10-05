@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -104,5 +105,49 @@ func TestSharedProgramStartsANewOneAfterTheProgramQuits(t *testing.T) {
 	waitFor(t, fresh, "typed:z")
 	if strings.Contains(strings.Join(fresh.frames(), "\n"), "typed:a") {
 		t.Error("a new program should not remember the old one")
+	}
+}
+
+// clicked shows where the last mouse press was.
+type clicked struct{ at string }
+
+func (c clicked) Init() tea.Cmd { return nil }
+func (c clicked) View() string  { return "click:" + c.at }
+func (c clicked) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if mouse, ok := msg.(tea.MouseMsg); ok && mouse.Action == tea.MouseActionPress {
+		c.at = fmt.Sprintf("%d,%d", mouse.X, mouse.Y)
+	}
+	return c, nil
+}
+
+func TestSharedProgramWithMouseReportsClicksAndTellsALateBrowserToo(t *testing.T) {
+	shared := NewSharedProgram(func() tea.Model { return clicked{} }, WithMouse())
+	first := &memoryTransport{incoming: make(chan []byte, 8)}
+	cancelFirst, _ := attach(shared, first)
+	defer cancelFirst()
+	send(t, first, protocol.ClientMessage{Type: "resize", Cols: 80, Rows: 24})
+	waitFor(t, first, `\u001b[?1002h`)
+
+	// A left button press at column 5, row 3, as a terminal reports it (SGR, 1-based).
+	send(t, first, protocol.ClientMessage{Type: "input", Data: "\x1b[<0;6;4M"})
+	waitFor(t, first, "click:5,3")
+
+	late := &memoryTransport{incoming: make(chan []byte, 8)}
+	cancelLate, _ := attach(shared, late)
+	defer cancelLate()
+	waitFor(t, late, `\u001b[?1006h`)
+}
+
+func TestSharedProgramWithoutMouseDoesNotAskForMouseReports(t *testing.T) {
+	shared := NewSharedProgram(func() tea.Model { return echo{} })
+	first := &memoryTransport{incoming: make(chan []byte, 8)}
+	cancelFirst, _ := attach(shared, first)
+	defer cancelFirst()
+	send(t, first, protocol.ClientMessage{Type: "resize", Cols: 80, Rows: 24})
+	send(t, first, protocol.ClientMessage{Type: "input", Data: "a"})
+	waitFor(t, first, "typed:a")
+
+	if strings.Contains(strings.Join(first.frames(), "\n"), `\u001b[?1002h`) {
+		t.Error("mouse reporting should be off unless asked for")
 	}
 }
