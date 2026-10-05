@@ -1,5 +1,5 @@
 // Package ttygo serves a Bubble Tea program to the browser, for the
-// @trectui/tty React component: the real terminal output, plus the semantic
+// @treactui/tty React component: the real terminal output, plus the semantic
 // information assistive technology needs.
 //
 //	mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))

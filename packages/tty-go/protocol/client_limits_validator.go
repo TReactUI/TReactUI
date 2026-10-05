@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// The limits on what a browser may send, the same as @trectui/protocol enforces.
+// The limits on what a browser may send, the same as @treactui/protocol enforces.
 // A terminal larger than maxCells is a mistake or an attack, not a screen; a run
 // message becomes a process command line, so it is bounded and free of NUL.
 const (

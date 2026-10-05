@@ -1,9 +1,9 @@
-# @trectui/tty
+# @treactui/tty
 
 A real terminal in the browser, with an accessibility layer, for any React app.
 
 ```tsx
-import { TTY } from '@trectui/tty'
+import { TTY } from '@treactui/tty'
 
 <TTY url="ws://localhost:8080/term" />
 ```
@@ -19,7 +19,7 @@ back to the page.
 ## Command launcher
 
 When the backend offers commands (a `commands` message, for example from `serveCommander` in
-[`@trectui/tty-node`](../tty-node)), `TTY` first shows an accessible form: pick a command, fill in
+[`@treactui/tty-node`](../tty-node)), `TTY` first shows an accessible form: pick a command, fill in
 its arguments and options, press Run. Every field has a label, a field that is wrong gets an error tied
 to it and focus, and each change of screen moves focus: to the form's heading on arrival, to the terminal
 when a command starts, to "Back to commands" when it ends. Stop ends a running command; use
@@ -30,7 +30,7 @@ typed text is never read as an option. A variadic argument is split on spaces.
 
 ## The protocol
 
-The wire messages live in [`@trectui/protocol`](../protocol), shared with the backend
+The wire messages live in [`@treactui/protocol`](../protocol), shared with the backend
 adapters.
 
 ## How this package is organised
@@ -49,7 +49,7 @@ src/
 ```
 
 Dependencies point one way: `tty` → `terminal-view`, `accessibility-layer`,
-`command-launcher`, `transport` → `@trectui/protocol`. Enforced by `npm run lint` (`verticalSlices` in the root
+`command-launcher`, `transport` → `@treactui/protocol`. Enforced by `npm run lint` (`verticalSlices` in the root
 `eslint.config.mjs`).
 
 ## Building and testing

@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import { useEffect, useId, useRef, useState } from 'react'
 import { ArgumentField } from './argument-field.component'
 import { buildCommandArgs } from './build-command-args.algorithm'

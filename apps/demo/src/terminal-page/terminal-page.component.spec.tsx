@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { TerminalPage } from './terminal-page.component'
 
-jest.mock('@trectui/tty', () => ({ TTY: ({ url }: { url: string }) => <div data-testid='tty'>{url}</div> }))
+jest.mock('@treactui/tty', () => ({ TTY: ({ url }: { url: string }) => <div data-testid='tty'>{url}</div> }))
 
 describe('TerminalPage', () => {
   it('renders a TTY pointed at the demo server', () => {

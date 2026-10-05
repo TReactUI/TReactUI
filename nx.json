@@ -135,8 +135,8 @@
     "applyChanges": true
   },
   "mnci": {
-    "workspaceName": "trectui",
-    "scope": "@trectui",
+    "workspaceName": "treactui",
+    "scope": "@treactui",
     "registry": {
       "kind": "npm"
     },

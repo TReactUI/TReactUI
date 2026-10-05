@@ -1,5 +1,5 @@
-import { parseServerMessage } from '@trectui/protocol'
-import type { ServerMessage } from '@trectui/protocol'
+import { parseServerMessage } from '@treactui/protocol'
+import type { ServerMessage } from '@treactui/protocol'
 import type { Transport } from '../session-transport'
 import { runSession } from './run-session.use-case'
 import type { SessionController } from './session.contract'

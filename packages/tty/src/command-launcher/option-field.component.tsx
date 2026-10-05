@@ -1,4 +1,4 @@
-import type { OptionSpec } from '@trectui/protocol'
+import type { OptionSpec } from '@treactui/protocol'
 
 export interface OptionFieldProps {
   id:       string

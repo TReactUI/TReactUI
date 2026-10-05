@@ -1,5 +1,5 @@
 // Command mvd-server serves the real mvd setup screens (download list and
-// preferences) to the @trectui/tty React component at ws://<addr>/term.
+// preferences) to the @treactui/tty React component at ws://<addr>/term.
 //
 // It uses a scratch config in a temporary folder, so trying it never touches
 // your real MVD settings or list.

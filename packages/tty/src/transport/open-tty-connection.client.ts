@@ -1,4 +1,4 @@
-import { encodeClientMessage, parseServerMessage } from '@trectui/protocol'
+import { encodeClientMessage, parseServerMessage } from '@treactui/protocol'
 import type { SocketLike, TtyConnection, TtyConnectionOptions } from './tty-connection.contract'
 
 const createBrowserSocket = (url: string): SocketLike => new WebSocket(url)

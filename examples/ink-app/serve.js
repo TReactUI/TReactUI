@@ -1,6 +1,6 @@
-// An Ink app served to @trectui/tty at ws://localhost:8080/term, rendered in this
+// An Ink app served to @treactui/tty at ws://localhost:8080/term, rendered in this
 // process: no PTY, no native module. Each browser gets its own instance.
-import { serveInk } from '@trectui/tty-node'
+import { serveInk } from '@treactui/tty-node'
 import { Box, Text, render, useInput } from 'ink'
 import { createElement as h, useState } from 'react'
 

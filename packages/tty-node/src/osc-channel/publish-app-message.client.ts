@@ -1,4 +1,4 @@
-import type { A11ySnapshot, Politeness, ServerMessage } from '@trectui/protocol'
+import type { A11ySnapshot, Politeness, ServerMessage } from '@treactui/protocol'
 import { APP_CHANNEL_BEL, APP_CHANNEL_ENV, APP_CHANNEL_START } from './app-channel.config'
 
 export interface AppChannelOutput {

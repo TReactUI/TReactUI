@@ -1,5 +1,5 @@
-import { parseServerMessage } from '@trectui/protocol'
-import type { ServerMessage } from '@trectui/protocol'
+import { parseServerMessage } from '@treactui/protocol'
+import type { ServerMessage } from '@treactui/protocol'
 import type { Transport } from '../session-transport'
 import type { InkInstanceLike } from './ink-session.contract'
 import { runInkSession } from './run-ink-session.use-case'

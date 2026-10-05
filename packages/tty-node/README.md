@@ -1,12 +1,12 @@
-# @trectui/tty-node
+# @treactui/tty-node
 
-Serves a Node program to [`@trectui/tty`](../tty) over a WebSocket: each browser gets its own copy
+Serves a Node program to [`@treactui/tty`](../tty) over a WebSocket: each browser gets its own copy
 of the program in a pseudo-terminal ([node-pty](https://github.com/microsoft/node-pty)), so
 anything that writes to a terminal works: commander CLIs, prompt libraries
 ([@clack/prompts](https://github.com/bombshell-dev/clack), inquirer), Ink, blessed.
 
 ```js
-import { serveCommand } from '@trectui/tty-node'
+import { serveCommand } from '@treactui/tty-node'
 
 await serveCommand({ command: 'node', args: ['cli.js', 'setup'], allowedOrigins: ['localhost:4200'] })
 // ws://127.0.0.1:8080/term
@@ -18,7 +18,7 @@ Ink accepts custom streams, so an Ink app can be served without a PTY or a nativ
 adapter's streams to your own `render`:
 
 ```js
-import { serveInk } from '@trectui/tty-node'
+import { serveInk } from '@treactui/tty-node'
 import { render } from 'ink'
 
 await serveInk({
@@ -41,11 +41,11 @@ Ink; it only needs `unmount()` and `waitUntilExit()` from what `render` returns.
 ## A commander CLI, with a launcher
 
 `serveCommander` reads a commander program (commands, arguments, options, choices, defaults, required)
-and offers it to the page as an accessible form (see [`@trectui/tty`](../tty)). The browser picks a command
+and offers it to the page as an accessible form (see [`@treactui/tty`](../tty)). The browser picks a command
 and fills it in; the command runs in a PTY, and when it ends the page can pick another.
 
 ```js
-import { serveCommander } from '@trectui/tty-node'
+import { serveCommander } from '@treactui/tty-node'
 import { program } from './program.js' // defines the commands, does not parse
 
 await serveCommander({ program, command: process.execPath, args: ['cli.js'], allowedOrigins: ['localhost:4200'] })
@@ -74,10 +74,10 @@ sequence (`ESC ] 7770 ; <json> BEL`) that the adapter strips and turns into prot
 Node:
 
 ```js
-import { announce, publishSnapshot } from '@trectui/tty-node'
+import { announce, publishSnapshot } from '@treactui/tty-node'
 
 announce('Download finished')                         // read aloud by a screen reader
-publishSnapshot({ title: 'Tasks', nodes: [/* ARIA */] }) // see @trectui/protocol
+publishSnapshot({ title: 'Tasks', nodes: [/* ARIA */] }) // see @treactui/protocol
 ```
 
 Both do nothing outside the adapter (the adapter sets `TREACT_TTY=1`), so the program still works in
@@ -107,4 +107,4 @@ src/
 
 Dependencies point one way: `serve-command`, `serve-ink` → `pty-session`, `ink-session`, `websocket-server`
 → `session-lifecycle` → `session-transport`; `pty-session` also uses `osc-channel`. Everything speaks
-`@trectui/protocol`.
+`@treactui/protocol`.

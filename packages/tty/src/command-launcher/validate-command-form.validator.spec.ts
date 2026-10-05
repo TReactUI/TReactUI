@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import { validateCommandForm } from './validate-command-form.validator'
 
 const command: CommandSpec = {

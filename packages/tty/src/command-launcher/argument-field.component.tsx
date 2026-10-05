@@ -1,4 +1,4 @@
-import type { ArgumentSpec } from '@trectui/protocol'
+import type { ArgumentSpec } from '@treactui/protocol'
 
 export interface ArgumentFieldProps {
   id:       string

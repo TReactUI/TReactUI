@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import type { CommandFormValues } from './command-form.contract'
 
 /**

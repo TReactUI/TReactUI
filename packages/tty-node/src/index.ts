@@ -1,4 +1,4 @@
-// Serve a program to @trectui/tty.
+// Serve a program to @treactui/tty.
 export { serveCommand } from './serve-command'
 export type { ServeCommandOptions } from './serve-command'
 export { serveCommander } from './serve-commander'

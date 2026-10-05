@@ -1,7 +1,7 @@
 # mvd-server
 
 Serves the real [mvd](https://github.com/russoedu/MVD) setup screens (download
-list, preferences, advanced, folder picker) to `@trectui/tty`, to prove the
+list, preferences, advanced, folder picker) to `@treactui/tty`, to prove the
 approach on an existing Bubble Tea application.
 
 It is its own Go module, with `replace` directives for local checkouts:

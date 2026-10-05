@@ -1,7 +1,7 @@
 // The commands of a small commander CLI. It is an ordinary program: the only line that
-// knows about @trectui is the `announce` call, which does nothing in a real terminal.
+// knows about @treactui is the `announce` call, which does nothing in a real terminal.
 import * as prompts from '@clack/prompts'
-import { announce } from '@trectui/tty-node'
+import { announce } from '@treactui/tty-node'
 import { Command } from 'commander'
 
 /** Builds the program; nothing runs until it is parsed, so importing this module has no effects. */

@@ -1,4 +1,4 @@
-import type { ServerMessage } from '@trectui/protocol'
+import type { ServerMessage } from '@treactui/protocol'
 
 export interface TerminalSize {
   cols: number

@@ -1,4 +1,4 @@
-// Command demo-server serves a Bubble Tea to-do list to the @trectui/tty
+// Command demo-server serves a Bubble Tea to-do list to the @treactui/tty
 // React component over a WebSocket at /term.
 package main
 

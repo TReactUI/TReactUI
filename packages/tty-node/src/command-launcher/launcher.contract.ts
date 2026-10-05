@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import type { PtySessionOptions } from '../pty-session'
 
 export interface LauncherOptions extends Omit<PtySessionOptions, 'startDelayMs'> {

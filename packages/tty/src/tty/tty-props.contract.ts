@@ -1,7 +1,7 @@
 import type { SocketLike } from '../transport'
 
 export interface TTYProps {
-  /** WebSocket URL of a backend that speaks the @trectui protocol. */
+  /** WebSocket URL of a backend that speaks the @treactui protocol. */
   url:           string
   /** Accessible name of the terminal. */
   label?:        string

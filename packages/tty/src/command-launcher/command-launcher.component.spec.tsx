@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import { CommandLauncher } from './command-launcher.component'
 
 const commands: CommandSpec[] = [

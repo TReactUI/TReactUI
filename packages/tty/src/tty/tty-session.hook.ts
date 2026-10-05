@@ -1,4 +1,4 @@
-import type { A11ySnapshot, CommandSpec, Politeness } from '@trectui/protocol'
+import type { A11ySnapshot, CommandSpec, Politeness } from '@treactui/protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { openTtyConnection } from '../transport'
 import type { TtyConnection } from '../transport'

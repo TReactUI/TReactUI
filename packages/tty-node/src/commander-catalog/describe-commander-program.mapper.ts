@@ -1,4 +1,4 @@
-import type { ArgumentSpec, CommandSpec, OptionSpec } from '@trectui/protocol'
+import type { ArgumentSpec, CommandSpec, OptionSpec } from '@treactui/protocol'
 
 /**
  * The parts of a commander `Command` the catalog reads. Structural, so this

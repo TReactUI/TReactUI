@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@trectui/protocol',
+  displayName: '@treactui/protocol',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

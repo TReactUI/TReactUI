@@ -1,7 +1,7 @@
 # commander-cli
 
-A commander CLI (`program.js`) served to [`@trectui/tty`](../../packages/tty) two ways. It is an
-ordinary program; the only line that knows about `@trectui` is `announce(...)`, which does nothing in a
+A commander CLI (`program.js`) served to [`@treactui/tty`](../../packages/tty) two ways. It is an
+ordinary program; the only line that knows about `@treactui` is `announce(...)`, which does nothing in a
 real terminal.
 
 ```sh

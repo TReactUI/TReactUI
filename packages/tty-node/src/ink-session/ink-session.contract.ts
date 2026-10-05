@@ -1,4 +1,4 @@
-import type { A11ySnapshot, Politeness } from '@trectui/protocol'
+import type { A11ySnapshot, Politeness } from '@treactui/protocol'
 
 /** What the render function receives: terminal-like streams, and a way to speak to the page. */
 export interface InkSessionContext {

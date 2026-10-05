@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import { buildCommandArgs } from './build-command-args.algorithm'
 
 const greet: CommandSpec = {

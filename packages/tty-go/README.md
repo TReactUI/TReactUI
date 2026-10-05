@@ -1,7 +1,7 @@
 # tty-go
 
 Serves a [Bubble Tea](https://github.com/charmbracelet/bubbletea) (v1) program to
-the browser for [`@trectui/tty`](../tty): the real terminal output over a
+the browser for [`@treactui/tty`](../tty): the real terminal output over a
 WebSocket, plus the semantic information assistive technology needs.
 
 ```go
@@ -24,7 +24,7 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
 The protocol's command catalog (`commands`, `run`, `stop`) is mirrored in `protocol/`, so a Go backend can
 speak it. This adapter does not run a launcher session itself yet: a handler that wants one sends
 `NewCommandsFrame` and handles `run`/`stop` messages. Incoming `resize` and `run` messages are bounded the
-same way as in `@trectui/protocol`.
+same way as in `@treactui/protocol`.
 
 ## Layout
 

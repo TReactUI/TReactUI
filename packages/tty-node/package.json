@@ -1,5 +1,5 @@
 {
-  "name": "@trectui/tty-node",
+  "name": "@treactui/tty-node",
   "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.esm.js",
@@ -20,7 +20,7 @@
     "!**/*.js.map"
   ],
   "dependencies": {
-    "@trectui/protocol": "~0.0.1",
+    "@treactui/protocol": "~0.0.1",
     "node-pty": "^1.1.0",
     "ws": "^8.22.0"
   },

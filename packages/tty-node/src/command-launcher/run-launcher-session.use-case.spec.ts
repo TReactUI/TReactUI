@@ -1,5 +1,5 @@
-import { parseServerMessage } from '@trectui/protocol'
-import type { CommandSpec, ServerMessage } from '@trectui/protocol'
+import { parseServerMessage } from '@treactui/protocol'
+import type { CommandSpec, ServerMessage } from '@treactui/protocol'
 import type { PtyLike, SpawnPtyOptions } from '../pty-session'
 import type { Transport } from '../session-transport'
 import { runLauncherSession } from './run-launcher-session.use-case'

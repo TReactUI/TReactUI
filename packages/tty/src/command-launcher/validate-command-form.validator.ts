@@ -1,4 +1,4 @@
-import type { CommandSpec } from '@trectui/protocol'
+import type { CommandSpec } from '@treactui/protocol'
 import { argumentFieldId, optionFieldId } from './command-form.contract'
 import type { CommandFormErrors, CommandFormValues } from './command-form.contract'
 

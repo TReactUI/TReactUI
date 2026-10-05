@@ -1,5 +1,5 @@
-import { PROTOCOL_VERSION, encodeServerMessage, parseClientMessage } from '@trectui/protocol'
-import type { ServerMessage } from '@trectui/protocol'
+import { PROTOCOL_VERSION, encodeServerMessage, parseClientMessage } from '@treactui/protocol'
+import type { ServerMessage } from '@treactui/protocol'
 import type { Transport } from '../session-transport'
 import type { SessionController, SessionOptions, TerminalSize } from './session.contract'
 

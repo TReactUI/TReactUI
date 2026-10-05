@@ -1,5 +1,5 @@
-import { parseServerMessage } from '@trectui/protocol'
-import type { ServerMessage } from '@trectui/protocol'
+import { parseServerMessage } from '@treactui/protocol'
+import type { ServerMessage } from '@treactui/protocol'
 import { APP_CHANNEL_ENV, createAppMessageExtractor } from '../osc-channel'
 import type { SessionController, SessionHost, TerminalSize } from '../session-lifecycle'
 import { spawnWithNodePty } from './node-pty.client'

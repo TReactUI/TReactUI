@@ -2,7 +2,7 @@
   "folders": [
     {
       "path": ".",
-      "name": "trectui"
+      "name": "treactui"
     }
   ],
   "settings": {
@@ -169,7 +169,7 @@
         "request": "launch",
         "name": "mnci: build",
         "command": "npm run build",
-        "cwd": "${workspaceFolder:trectui}",
+        "cwd": "${workspaceFolder:treactui}",
         "presentation": {
           "group": "mnci",
           "order": 1
@@ -180,7 +180,7 @@
         "request": "launch",
         "name": "mnci: test",
         "command": "npm run test",
-        "cwd": "${workspaceFolder:trectui}",
+        "cwd": "${workspaceFolder:treactui}",
         "presentation": {
           "group": "mnci",
           "order": 2
@@ -191,7 +191,7 @@
         "request": "launch",
         "name": "mnci: lint",
         "command": "npm run lint",
-        "cwd": "${workspaceFolder:trectui}",
+        "cwd": "${workspaceFolder:treactui}",
         "presentation": {
           "group": "mnci",
           "order": 3
@@ -202,7 +202,7 @@
         "request": "launch",
         "name": "mnci: typecheck",
         "command": "npm run typecheck",
-        "cwd": "${workspaceFolder:trectui}",
+        "cwd": "${workspaceFolder:treactui}",
         "presentation": {
           "group": "mnci",
           "order": 4

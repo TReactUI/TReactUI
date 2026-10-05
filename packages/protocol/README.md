@@ -1,6 +1,6 @@
-# @trectui/protocol
+# @treactui/protocol
 
-The wire protocol between a backend and the [`@trectui/tty`](../tty) React component:
+The wire protocol between a backend and the [`@treactui/tty`](../tty) React component:
 JSON text frames over one WebSocket. It has no dependencies and runs in the browser and in
 Node, so the React package and every backend adapter share one definition. The Go adapter
 ([`tty-go`](../tty-go)) mirrors it in `protocol/`.

@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@trectui/tty-node',
+  displayName: '@treactui/tty-node',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

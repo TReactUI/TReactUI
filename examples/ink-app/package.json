@@ -1,11 +1,11 @@
 {
-  "name": "@trectui/example-ink-app",
+  "name": "@treactui/example-ink-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "An Ink app served to @trectui/tty, in-process (no PTY).",
+  "description": "An Ink app served to @treactui/tty, in-process (no PTY).",
   "dependencies": {
-    "@trectui/tty-node": "~0.0.1",
+    "@treactui/tty-node": "~0.0.1",
     "ink": "^8.0.0",
     "react": "^19.3.0"
   }

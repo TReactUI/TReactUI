@@ -1,4 +1,4 @@
-// Package protocol holds the wire messages shared with the @trectui/tty React
+// Package protocol holds the wire messages shared with the @treactui/tty React
 // package: JSON text frames over one WebSocket. It depends on nothing else.
 package protocol
 
