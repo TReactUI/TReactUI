@@ -1,6 +1,6 @@
 module github.com/TReactUI/TReactUI
 
-go 1.27
+go 1.24
 
 require (
 	github.com/charmbracelet/bubbletea v1.3.4

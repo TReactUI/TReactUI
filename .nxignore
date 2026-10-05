@@ -1,0 +1,2 @@
+# Needs a sibling checkout of the mvd repository (see examples/mvd-server/README.md), which CI does not have.
+examples/mvd-server

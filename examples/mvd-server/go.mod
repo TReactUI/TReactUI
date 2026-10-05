@@ -1,6 +1,6 @@
 module github.com/TReactUI/TReactUI/examples/mvd-server
 
-go 1.27
+go 1.24
 
 require (
 	github.com/TReactUI/TReactUI v0.0.0
