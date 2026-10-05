@@ -21,4 +21,12 @@ describe('parseServerMessage', () => {
     expect(parseServerMessage('nope')).toEqual({ ok: false, reason: 'frame is not valid JSON' })
     expect(parseServerMessage('{"type":"zap"}')).toEqual({ ok: false, reason: 'unknown message type "zap"' })
   })
+
+  it('accepts a command list and rejects a malformed one', () => {
+    const commands = [{ name: 'greet', arguments: [], options: [] }]
+    const parsed = parseServerMessage(JSON.stringify({ type: 'commands', commands }))
+
+    expect(parsed.ok && parsed.message.type === 'commands' && parsed.message.commands[0]?.name).toBe('greet')
+    expect(parseServerMessage('{"type":"commands","commands":[{"arguments":[]}]}').ok).toBe(false)
+  })
 })

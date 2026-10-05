@@ -16,6 +16,8 @@ module.exports = {
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig]
   },
+  // commander 15 ships ES modules only; transform it so the specs can run against the real thing.
+  transformIgnorePatterns: ['/node_modules/(?!commander/)'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: 'test-output/jest/coverage'
 };

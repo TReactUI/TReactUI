@@ -117,4 +117,18 @@ describe('runSession', () => {
     expect(running.written).toEqual([])
     expect(running.resizes).toEqual([])
   })
+
+  it('ignores the launcher messages, which only a command launcher understands', async () => {
+    const transport = memoryTransport()
+    const running = controller()
+    runSession(transport, { start: () => running })
+    transport.receive('{"type":"resize","cols":80,"rows":24}')
+    await flush()
+
+    transport.receive('{"type":"run","command":"x","args":[]}')
+    transport.receive('{"type":"stop"}')
+
+    expect(running.written).toEqual([])
+    expect(running.disposed).toBe(false)
+  })
 })

@@ -1,4 +1,5 @@
 export * from './a11y-snapshot'
 export * from './client-messages'
+export * from './command-catalog'
 export * from './protocol-version'
 export * from './server-messages'

@@ -55,12 +55,15 @@ export function runSession (transport: Transport, options: SessionOptions): void
       size = { cols: parsed.message.cols, rows: parsed.message.rows }
       if (controller === undefined) start()
       else controller.resize(size.cols, size.rows)
-    } else if (controller === undefined) {
-      queuedInput.push(parsed.message.data)
-      start()
-    } else {
-      controller.write(parsed.message.data)
+    } else if (parsed.message.type === 'input') {
+      if (controller === undefined) {
+        queuedInput.push(parsed.message.data)
+        start()
+      } else {
+        controller.write(parsed.message.data)
+      }
     }
+    // `run` and `stop` belong to the command launcher; a session that serves one program ignores them.
   })
 
   transport.onClose(() => {

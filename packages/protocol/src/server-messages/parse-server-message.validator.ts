@@ -1,3 +1,4 @@
+import { parseCommandCatalog } from '../command-catalog'
 import type { ServerMessage } from './server-message.contract'
 
 export type ParsedServerMessage =
@@ -47,6 +48,13 @@ export function parseServerMessage (frame: string): ParsedServerMessage {
       return typeof raw['name'] === 'string'
         ? { ok: true, message: { type: 'event', name: raw['name'], payload: raw['payload'] } }
         : { ok: false, reason: 'event needs a name' }
+    }
+    case 'commands': {
+      const commands = parseCommandCatalog(raw['commands'])
+
+      return commands === undefined
+        ? { ok: false, reason: 'commands needs a well-formed command list' }
+        : { ok: true, message: { type: 'commands', commands } }
     }
     default: {
       return { ok: false, reason: `unknown message type "${raw['type']}"` }
