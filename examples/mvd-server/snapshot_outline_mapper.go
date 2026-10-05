@@ -32,9 +32,9 @@ func snapshotFromOutline(out tui.ScreenOutline) ttygo.Snapshot {
 }
 
 func itemsListbox(out tui.ScreenOutline) ttygo.A11yNode {
-	label := "Settings"
-	if out.HasText {
-		label = "Sub-folders"
+	label := out.ItemsLabel
+	if label == "" {
+		label = "Items"
 	}
 	options := make([]ttygo.A11yNode, len(out.Items))
 	for i, item := range out.Items {

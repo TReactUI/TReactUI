@@ -1,13 +1,14 @@
 # mvd-server
 
-Serves the real [mvd](https://github.com/russoedu/MVD) setup screens (download
-list, preferences, advanced, folder picker) to `@treactui/tty`, to prove the
-approach on an existing Bubble Tea application.
+Serves the real [mvd](https://github.com/russoedu/MVD) app to `@treactui/tty`: the
+setup screens (download list, preferences, advanced, folder picker) and the download
+screen, with the loop between them, to prove the approach on an existing Bubble Tea
+application.
 
 It is its own Go module, with `replace` directives for local checkouts:
 `github.com/TReactUI/TReactUI => ../..` and `youtube-downloader => ../../../mvd`
-(a sibling checkout of the mvd repository at `main`, which has `tui.NewSetupModel` and
-`ScreenOutline` since mvd#52). It is not part of the root module or of CI.
+(a sibling checkout of the mvd repository at `main`, which has `tui.NewAppModel` and
+`ScreenOutline` since mvd#53). It is not part of the root module or of CI.
 
 ```sh
 cd examples/mvd-server && go run .          # ws://localhost:8080/term
@@ -32,7 +33,11 @@ real MVD settings or list.
 - **No protocol roles were missing.** The screens map onto `textbox`, `listbox` and
   `option`, `list` and `listitem`, and `status`. An open radio editor becomes a
   second `listbox` of choices.
-- **Not covered:** the download screen (`tui.RunDownload`), which is a separate model
-  driven by the engine. Pressing Ctrl+S on the list ends the setup program, so the
-  session closes. Serving the download run would need its model and an engine to be
-  started by the host.
+- **The download screen came with `tui.NewAppModel`**, a model that runs the setup screens,
+  then a download run, then the setup screens again, as the terminal app does with two
+  programs. The host passes a `RunStarter` (here `start_download_run_use_case.go`, which builds
+  mvd's engine) and the model closes the run when the user leaves the screen. The download
+  screen's `Outline()` lists the selected playlist's entries, a window of 51 around the
+  selection, as a list of items with their state.
+- **Not covered yet:** a run belongs to one connection, so a reload ends it; and nothing is
+  shared between two windows.

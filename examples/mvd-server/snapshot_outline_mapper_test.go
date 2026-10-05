@@ -38,3 +38,15 @@ func TestSettingsBecomeAListboxAndAnOpenRadioEditorItsChoices(t *testing.T) {
 		t.Fatalf("unexpected choices %+v", choices)
 	}
 }
+
+func TestDownloadsAreListedUnderTheirOwnLabel(t *testing.T) {
+	snapshot := snapshotFromOutline(tui.ScreenOutline{
+		Title: "MVD · Downloads: 0 done, 1 running, 0 queued, 0 failed", ItemsLabel: "Downloads",
+		Items: []tui.OutlineItem{{Label: "01 One", Value: "downloading 34%", Selected: true}},
+	})
+
+	listbox := snapshot.Nodes[0]
+	if listbox.Label != "Downloads" || listbox.Children[0].Label != "01 One: downloading 34%" {
+		t.Fatalf("unexpected listbox %+v", listbox)
+	}
+}

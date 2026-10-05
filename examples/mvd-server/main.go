@@ -1,11 +1,12 @@
-// Command mvd-server serves the real mvd setup screens (download list and
-// preferences) to the @treactui/tty React component at ws://<addr>/term.
+// Command mvd-server serves the real mvd app (the setup screens and the
+// download screen) to the @treactui/tty React component at ws://<addr>/term.
 //
 // It uses a scratch config in a temporary folder, so trying it never touches
 // your real MVD settings or list.
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -32,12 +33,16 @@ func main() {
 	defer func() { _ = os.RemoveAll(scratch) }()
 
 	cfg := config.Default(scratch, scratch)
+	start := startDownloadRun(context.Background())
 	newModel := func() tea.Model {
-		return accessibleSetup{tui.NewSetupModel(tui.SetupInput{
-			Cfg:      cfg,
-			URLs:     []string{"https://www.youtube.com/playlist?list=PL-example", "https://www.youtube.com/watch?v=example"},
-			CfgPath:  scratch + "/config.conf",
-			ListPath: scratch + "/list.txt",
+		return accessibleApp{tui.NewAppModel(tui.AppInput{
+			Setup: tui.SetupInput{
+				Cfg:      cfg,
+				URLs:     []string{"https://www.youtube.com/playlist?list=PL-example", "https://www.youtube.com/watch?v=example"},
+				CfgPath:  scratch + "/config.conf",
+				ListPath: scratch + "/list.txt",
+			},
+			Start: start,
 		})}
 	}
 
