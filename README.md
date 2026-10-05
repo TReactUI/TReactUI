@@ -61,7 +61,7 @@ await serveCommander({
 **A Bubble Tea app (Go).**
 
 ```go
-import ttygo "github.com/TReactUI/TReactUI"
+import ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
 
 mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))
 ```

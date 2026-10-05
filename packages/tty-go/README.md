@@ -4,7 +4,13 @@ Serves a [Bubble Tea](https://github.com/charmbracelet/bubbletea) (v1) program t
 the browser for [`@treactui/tty`](../tty): the real terminal output over a
 WebSocket, plus the semantic information assistive technology needs.
 
+```sh
+go get github.com/TReactUI/TReactUI/packages/tty-go
+```
+
 ```go
+import ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
+
 mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))
 ```
 
