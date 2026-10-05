@@ -14,6 +14,9 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
   screen, and it keeps running when no browser is open (a reload or a second window finds it as it was).
   It starts when the first browser connects and again after the program quits; the screen has the size
   of the latest resize.
+- `Options.Mouse` turns mouse reporting on, so a model receives `tea.MouseMsg` (clicks, the wheel, drags),
+  also in a shared program for a browser that joins late. With it on the browser passes mouse events to the
+  program instead of selecting text; Shift+drag selects. Pasting text works either way (bracketed paste).
 - A model may implement `ttygo.Accessible` to describe its screen. A snapshot is
   sent whenever it changes.
 - A command may return `ttygo.AnnounceMsg` (screen-reader announcement) or

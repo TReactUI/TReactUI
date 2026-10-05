@@ -24,6 +24,10 @@ type Options struct {
 	// AllowedOrigins lists extra Origin host patterns allowed to connect,
 	// for example "localhost:5173" during development.
 	AllowedOrigins []string
+	// Mouse turns mouse reporting on, so the program receives tea.MouseMsg
+	// (clicks, the wheel and drags). With it on, the browser passes mouse
+	// events to the program instead of selecting text; Shift+drag selects.
+	Mouse bool
 }
 
 // Handler serves a fresh program from newModel on every WebSocket connection.
@@ -32,7 +36,7 @@ type Options struct {
 // strip every style. Handler therefore forces true colour, process-wide.
 func Handler(newModel func() tea.Model, options Options) http.Handler {
 	lipgloss.SetColorProfile(termenv.TrueColor)
-	return socket.Handler(newModel, socket.Options{AllowedOrigins: options.AllowedOrigins})
+	return socket.Handler(newModel, socket.Options{AllowedOrigins: options.AllowedOrigins, Mouse: options.Mouse})
 }
 
 // SharedHandler serves one program to every connection: they all see the same
@@ -45,5 +49,9 @@ func Handler(newModel func() tea.Model, options Options) http.Handler {
 // use Handler when each browser should get its own program.
 func SharedHandler(newModel func() tea.Model, options Options) http.Handler {
 	lipgloss.SetColorProfile(termenv.TrueColor)
-	return socket.SharedHandler(session.NewSharedProgram(newModel), socket.Options{AllowedOrigins: options.AllowedOrigins})
+	var sessionOptions []session.Option
+	if options.Mouse {
+		sessionOptions = append(sessionOptions, session.WithMouse())
+	}
+	return socket.SharedHandler(session.NewSharedProgram(newModel, sessionOptions...), socket.Options{AllowedOrigins: options.AllowedOrigins})
 }

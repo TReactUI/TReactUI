@@ -47,7 +47,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/term", ttygo.SharedHandler(newModel, ttygo.Options{AllowedOrigins: strings.Split(*origins, ",")}))
+	mux.Handle("/term", ttygo.SharedHandler(newModel, ttygo.Options{AllowedOrigins: strings.Split(*origins, ","), Mouse: true}))
 	log.Printf("serving the mvd screens at ws://%s/term (scratch config in %s)", *addr, scratch)
 	log.Fatal(http.ListenAndServe(*addr, mux))
 }
