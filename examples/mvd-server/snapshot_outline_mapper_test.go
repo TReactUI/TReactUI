@@ -1,0 +1,40 @@
+package main
+
+import (
+	"testing"
+
+	"youtube-downloader/libs/mvd-core/tui"
+)
+
+func TestListScreenBecomesATextboxWithKeyboardShortcuts(t *testing.T) {
+	snapshot := snapshotFromOutline(tui.ScreenOutline{
+		Title: "MVD · Download list (1 item)", Text: "https://a", HasText: true,
+		Keys: []tui.OutlineKey{{Key: "ctrl+s", Description: "start"}},
+	})
+
+	if snapshot.Nodes[0].Role != "textbox" || snapshot.Nodes[0].Value != "https://a" || !snapshot.Nodes[0].Focused {
+		t.Fatalf("unexpected textbox %+v", snapshot.Nodes[0])
+	}
+	if shortcuts := snapshot.Nodes[1]; shortcuts.Role != "list" || shortcuts.Children[0].Value != "ctrl+s: start" {
+		t.Fatalf("unexpected shortcuts %+v", shortcuts)
+	}
+}
+
+func TestSettingsBecomeAListboxAndAnOpenRadioEditorItsChoices(t *testing.T) {
+	snapshot := snapshotFromOutline(tui.ScreenOutline{
+		Title: "MVD · Preferences",
+		Items: []tui.OutlineItem{
+			{Label: "Output Folder", Value: "/tmp"},
+			{Label: "Video Quality", Value: "best", Selected: true, Editing: true, Choices: []string{"best", "1080p"}, Chosen: 0},
+		},
+	})
+
+	listbox := snapshot.Nodes[0]
+	if listbox.Role != "listbox" || listbox.Children[1].Label != "Video Quality: best" || !listbox.Children[1].Selected {
+		t.Fatalf("unexpected listbox %+v", listbox)
+	}
+	choices := snapshot.Nodes[1]
+	if choices.Label != "Choices for Video Quality, 2 options" || len(choices.Children) != 2 || !choices.Children[0].Selected {
+		t.Fatalf("unexpected choices %+v", choices)
+	}
+}

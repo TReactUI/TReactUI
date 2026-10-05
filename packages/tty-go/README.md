@@ -40,3 +40,9 @@ go test ./packages/tty-go/...
 ```
 
 `nx lint tty-go` needs `golangci-lint` installed.
+
+## A real application
+
+[`examples/mvd-server`](../../examples/mvd-server) serves the setup screens of an
+existing Bubble Tea program (mvd) without forking its TUI. Writing `Accessible()`
+for it cost about one mapper function per screen; see its README for the findings.
