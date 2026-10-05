@@ -15,6 +15,7 @@ import (
 
 	"net/http"
 
+	"github.com/TReactUI/TReactUI/packages/tty-go/session"
 	"github.com/TReactUI/TReactUI/packages/tty-go/socket"
 )
 
@@ -32,4 +33,17 @@ type Options struct {
 func Handler(newModel func() tea.Model, options Options) http.Handler {
 	lipgloss.SetColorProfile(termenv.TrueColor)
 	return socket.Handler(newModel, socket.Options{AllowedOrigins: options.AllowedOrigins})
+}
+
+// SharedHandler serves one program to every connection: they all see the same
+// screen, anyone's keystrokes reach it, and it keeps running when every browser
+// has left, so a reload or a second window finds it as it was. newModel is
+// called when the first browser connects, and again for the first connection
+// after the program quits. The screen has the size of the latest resize.
+//
+// Use it for an application with one user and one state (a tray app's window);
+// use Handler when each browser should get its own program.
+func SharedHandler(newModel func() tea.Model, options Options) http.Handler {
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	return socket.SharedHandler(session.NewSharedProgram(newModel), socket.Options{AllowedOrigins: options.AllowedOrigins})
 }

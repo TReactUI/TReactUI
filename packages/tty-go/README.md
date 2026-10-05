@@ -10,6 +10,10 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
 
 - Each connection runs its own program. Browser keystrokes and mouse events arrive
   as terminal input; resizes arrive as `tea.WindowSizeMsg`.
+- `ttygo.SharedHandler` serves one program to every connection instead: they all see and drive the same
+  screen, and it keeps running when no browser is open (a reload or a second window finds it as it was).
+  It starts when the first browser connects and again after the program quits; the screen has the size
+  of the latest resize.
 - A model may implement `ttygo.Accessible` to describe its screen. A snapshot is
   sent whenever it changes.
 - A command may return `ttygo.AnnounceMsg` (screen-reader announcement) or
@@ -33,7 +37,7 @@ Slices are Go packages, with files named `<name>_<role>.go`.
 ```
 protocol/   wire messages and their encoding. Depends on nothing.
 observer/   wraps a model: emits snapshots, turns announce/event messages into frames
-session/    runs one program over an abstract Transport
+session/    runs one program over an abstract Transport: one per connection, or one shared by all
 socket/     the WebSocket adapter for Transport
 ```
 

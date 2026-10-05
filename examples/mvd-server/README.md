@@ -39,5 +39,7 @@ real MVD settings or list.
   mvd's engine) and the model closes the run when the user leaves the screen. The download
   screen's `Outline()` lists the selected playlist's entries, a window of 51 around the
   selection, as a list of items with their state.
-- **Not covered yet:** a run belongs to one connection, so a reload ends it; and nothing is
-  shared between two windows.
+- **One program, shared by every connection** (`ttygo.SharedHandler`): reloading the page, or opening a
+  second window, shows the screen as it was, and a download run keeps going while no page is open. Anyone's
+  keystrokes reach the program, and the screen has the size of the latest resize. When the user quits the
+  setup screens the program ends, and the next page to connect starts a fresh one.
