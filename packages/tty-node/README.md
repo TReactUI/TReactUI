@@ -12,6 +12,30 @@ await serveCommand({ command: 'node', args: ['cli.js', 'setup'], allowedOrigins:
 // ws://127.0.0.1:8080/term
 ```
 
+## From the command line, in any language
+
+`treactui serve` serves any program, whatever it is written in, without a line of JavaScript:
+
+```sh
+npx treactui serve --origin localhost:4200 -- python app.py
+# Serving "python app.py" at ws://127.0.0.1:8080/term
+```
+
+Everything after `--` is the program and its arguments, passed as a list (never through a shell). A
+bare name such as `python` is looked up on `PATH` (and `PATHEXT` on Windows, where a pseudo-terminal
+does not do it for you).
+
+| Option | Meaning |
+|---|---|
+| `--port <n>` | Port; `0` picks a free one. Default 8080. |
+| `--host <address>` | Default `127.0.0.1`. Anything else exposes a program-running endpoint to the network, and the command warns. |
+| `--path <path>` | WebSocket path. Default `/term`. |
+| `--origin <page>` | A page allowed to connect, as a host (`localhost:4200`) or a full origin. Repeatable. Pages on the same host always may. |
+| `--cwd <folder>` | Working directory of the program. |
+
+The program renders in the page as it is. To give a screen reader more than the terminal text, it can
+print the [side channel](#speaking-to-the-page-from-the-program) frames; any language can.
+
 ## Ink, in-process
 
 Ink accepts custom streams, so an Ink app can be served without a PTY or a native module. Pass the

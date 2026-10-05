@@ -2,6 +2,9 @@
   "name": "@treactui/tty-node",
   "version": "0.0.1",
   "type": "module",
+  "bin": {
+    "treactui": "./bin/treactui.js"
+  },
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/src/index.d.ts",
@@ -15,6 +18,7 @@
   },
   "files": [
     "dist",
+    "bin",
     "!**/*.tsbuildinfo",
     "!**/*.d.ts.map",
     "!**/*.js.map"
