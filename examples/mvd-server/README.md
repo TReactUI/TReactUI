@@ -6,8 +6,8 @@ approach on an existing Bubble Tea application.
 
 It is its own Go module, with `replace` directives for local checkouts:
 `github.com/TReactUI/TReactUI => ../..` and `youtube-downloader => ../../../mvd`
-(a sibling checkout of the mvd repository, on a branch that has `tui.NewSetupModel`
-and `ScreenOutline`). It is not part of the root module or of CI.
+(a sibling checkout of the mvd repository at `main`, which has `tui.NewSetupModel` and
+`ScreenOutline` since mvd#52). It is not part of the root module or of CI.
 
 ```sh
 cd examples/mvd-server && go run .          # ws://localhost:8080/term
