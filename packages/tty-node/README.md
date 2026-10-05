@@ -38,6 +38,23 @@ Ink; it only needs `unmount()` and `waitUntilExit()` from what `render` returns.
 | Isolation | one OS process per browser | one React tree per browser; a crash is caught, a blocked event loop is shared |
 | Speaking to the page | the OSC channel (`announce`, `publishSnapshot`) | the session context |
 
+## A commander CLI, with a launcher
+
+`serveCommander` reads a commander program (commands, arguments, options, choices, defaults, required)
+and offers it to the page as an accessible form (see [`@trectui/tty`](../tty)). The browser picks a command
+and fills it in; the command runs in a PTY, and when it ends the page can pick another.
+
+```js
+import { serveCommander } from '@trectui/tty-node'
+import { program } from './program.js' // defines the commands, does not parse
+
+await serveCommander({ program, command: process.execPath, args: ['cli.js'], allowedOrigins: ['localhost:4200'] })
+// runs: node cli.js <command> <arguments>
+```
+
+The program is read for its metadata only (any commander 11+ `Command` fits; this package does not
+depend on commander). A nested command is offered by its path, `remote add`.
+
 ## Security
 
 The endpoint runs programs, so it is closed by default:
@@ -45,7 +62,10 @@ The endpoint runs programs, so it is closed by default:
 - it listens on `127.0.0.1` only (`host` opts in to more);
 - a page may connect only if it was served from the same host, or is listed in `allowedOrigins`
   (this stops a foreign web page driving your local terminal through the visitor's browser);
-- the program is fixed by the server; the browser cannot choose what to run.
+- the program is fixed by the server. With `serveCommander` the browser chooses among the commands the
+  server catalogued and supplies their arguments, which reach the program as an argument list (never through
+  a shell, bounded in number, size and free of NUL). Treat that as the CLI's own exposed surface: anything a
+  command can do with arguments, a visitor to the page can ask it to do.
 
 ## Speaking to the page from the program
 
@@ -80,6 +100,9 @@ src/
   ink-session/         runs an Ink app in-process on fake TTY streams
   serve-command/       serveTty + runPtySession: serve one program
   serve-ink/           serveTty + runInkSession: serve one Ink app
+  commander-catalog/   reads a commander program into a command catalog
+  command-launcher/    offers the catalog and runs the chosen command, one at a time
+  serve-commander/     serveTty + runLauncherSession: serve a commander CLI with a launcher
 ```
 
 Dependencies point one way: `serve-command`, `serve-ink` → `pty-session`, `ink-session`, `websocket-server`

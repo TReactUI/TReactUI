@@ -19,6 +19,7 @@ jest.mock('@xterm/xterm', () => ({
     onData () {}
     onResize () {}
     blur () {}
+    focus () {}
     dispose () {}
     write (data: string) { written.push(data) }
   },

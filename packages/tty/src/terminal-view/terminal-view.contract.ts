@@ -4,8 +4,8 @@ export interface TerminalHandle {
 }
 
 export interface TerminalViewProps {
-  /** Receives the handle once the terminal exists. */
-  onReady:          (handle: TerminalHandle) => void
+  /** Receives the handle once the terminal exists, and `undefined` when it goes away. */
+  onReady:          (handle: TerminalHandle | undefined) => void
   /** Keystrokes and pastes typed by the user. */
   onInput:          (data: string) => void
   /** The terminal's size in cells, on mount and after every change. */
@@ -15,5 +15,7 @@ export interface TerminalViewProps {
    * semantic layer describes the screen, or both are read.
    */
   screenReaderMode: boolean
+  /** Gives the terminal keyboard focus when it appears. */
+  focusOnMount?:    boolean
   ariaLabel?:       string
 }

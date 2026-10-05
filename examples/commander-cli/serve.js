@@ -1,16 +1,15 @@
-// Serves the CLI to @trectui/tty at ws://localhost:8080/term.
-// Usage: node serve.js [command and arguments...]   (default: setup)
+// Serves the CLI to @trectui/tty at ws://localhost:8080/term, with a launcher: the browser shows
+// a form built from the program's commands, arguments and options, then runs the one chosen.
 import { fileURLToPath } from 'node:url'
-import { serveCommand } from '@trectui/tty-node'
+import { serveCommander } from '@trectui/tty-node'
+import { program } from './program.js'
 
-const cli = fileURLToPath(new URL('cli.js', import.meta.url))
-const args = process.argv.slice(2)
-
-const server = await serveCommand({
+const server = await serveCommander({
+  program,
   command: process.execPath,
-  args: [cli, ...(args.length > 0 ? args : ['setup'])],
+  args: [fileURLToPath(new URL('cli.js', import.meta.url))],
   port: 8080,
   allowedOrigins: ['localhost:4200'],
 })
 
-console.log(`serving "tasks ${args.join(' ') || 'setup'}" at ws://localhost:${server.port}/term`)
+console.log(`serving the "${program.name()}" launcher at ws://localhost:${server.port}/term`)

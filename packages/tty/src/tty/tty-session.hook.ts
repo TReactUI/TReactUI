@@ -1,5 +1,5 @@
+import type { A11ySnapshot, CommandSpec, Politeness } from '@trectui/protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { A11ySnapshot, Politeness } from '@trectui/protocol'
 import { openTtyConnection } from '../transport'
 import type { TtyConnection } from '../transport'
 import type { TTYProps } from './tty-props.contract'
@@ -8,20 +8,49 @@ interface TtySessionOptions extends Pick<TTYProps, 'url' | 'onEvent' | 'createSo
   onOutput: (data: string) => void
 }
 
-interface TtySession {
-  snapshot:     A11ySnapshot | undefined
-  announcement: { text: string, politeness: Politeness } | undefined
-  sendInput:    (data: string) => void
-  sendResize:   (cols: number, rows: number) => void
+/**
+ * Where the session is. A backend that offers commands starts at `choosing`;
+ * one that serves a single program stays at `terminal`.
+ */
+export type TtyPhase = 'terminal' | 'choosing' | 'running' | 'finished'
+
+export interface RunSummary {
+  command:   string
+  exitCode?: number
+  /** The user pressed Stop, so the exit code is the platform's kill status, not news. */
+  stopped?:  boolean
 }
 
-/** Owns the connection to the backend and the accessibility state it streams. */
+interface TtySession {
+  snapshot:       A11ySnapshot | undefined
+  announcement:   { text: string, politeness: Politeness } | undefined
+  commands:       CommandSpec[] | undefined
+  phase:          TtyPhase
+  run:            RunSummary | undefined
+  sendInput:      (data: string) => void
+  sendResize:     (cols: number, rows: number) => void
+  /** Asks to run a command; it is sent once the terminal that will show it exists. */
+  requestRun:     (command: string, args: string[]) => void
+  /** Call when the terminal exists, so a requested run can start at its size. */
+  terminalReady:  () => void
+  stop:           () => void
+  backToCommands: () => void
+}
+
+const exitCodeOf = (payload: unknown): number | undefined =>
+  typeof payload === 'object' && payload !== null && 'exitCode' in payload && typeof payload.exitCode === 'number' ? payload.exitCode : undefined
+
+/** Owns the connection to the backend and the state it streams: output, accessibility, and the command launcher. */
 export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySessionOptions): TtySession {
   const [snapshot, setSnapshot] = useState<A11ySnapshot>()
   const [announcement, setAnnouncement] = useState<TtySession['announcement']>()
+  const [commands, setCommands] = useState<CommandSpec[]>()
+  const [phase, setPhase] = useState<TtyPhase>('terminal')
+  const [run, setRun] = useState<RunSummary>()
   const connectionRef = useRef<TtyConnection>(undefined)
   // The terminal reports its size before the connection exists; keep the latest to send on connect.
   const sizeRef = useRef<{ cols: number, rows: number }>(undefined)
+  const pendingRunRef = useRef<{ command: string, args: string[] }>(undefined)
   const handlersRef = useRef({ onEvent, onOutput })
   handlersRef.current = { onEvent, onOutput }
 
@@ -43,7 +72,16 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
             setAnnouncement({ text: message.text, politeness: message.politeness })
             break
           }
+          case 'commands': {
+            setCommands(message.commands)
+            setPhase('choosing')
+            break
+          }
           case 'event': {
+            if (message.name === 'exit') {
+              setPhase(current => current === 'running' ? 'finished' : current)
+              setRun(current => current === undefined ? current : { ...current, exitCode: exitCodeOf(message.payload) })
+            }
             handlersRef.current.onEvent?.(message.name, message.payload)
             break
           }
@@ -67,6 +105,24 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
     sizeRef.current = { cols, rows }
     connectionRef.current?.send({ type: 'resize', cols, rows })
   }, [])
+  const requestRun = useCallback((command: string, args: string[]) => {
+    pendingRunRef.current = { command, args }
+    setRun({ command })
+    setPhase('running')
+  }, [])
+  const terminalReady = useCallback(() => {
+    const pending = pendingRunRef.current
+    pendingRunRef.current = undefined
+    if (pending !== undefined) connectionRef.current?.send({ type: 'run', ...pending })
+  }, [])
+  const stop = useCallback(() => {
+    setRun(current => current === undefined ? current : { ...current, stopped: true })
+    connectionRef.current?.send({ type: 'stop' })
+  }, [])
+  const backToCommands = useCallback(() => {
+    setRun(undefined)
+    setPhase('choosing')
+  }, [])
 
-  return { snapshot, announcement, sendInput, sendResize }
+  return { snapshot, announcement, commands, phase, run, sendInput, sendResize, requestRun, terminalReady, stop, backToCommands }
 }
