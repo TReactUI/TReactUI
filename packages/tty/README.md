@@ -18,20 +18,8 @@ back to the page.
 
 ## The protocol
 
-One WebSocket, JSON text frames. Types are exported from the package root.
-
-| Direction | `type` | Carries |
-|---|---|---|
-| backend → browser | `hello` | `version` |
-| | `output` | `data`: terminal output (ANSI) |
-| | `a11y-snapshot` | `snapshot`: `{ title, nodes[] }` of ARIA roles |
-| | `announce` | `text`, `politeness` (`polite` \| `assertive`) |
-| | `event` | `name`, `payload`: a web-only action for the host app (`onEvent`) |
-| browser → backend | `input` | `data`: keystrokes |
-| | `resize` | `cols`, `rows` |
-
-A selectable list is a `listbox` of `option` nodes (`aria-selected` is invalid on a
-`listitem`); use `list`/`listitem` for static lists.
+The wire messages live in [`@trectui/protocol`](../protocol), shared with the backend
+adapters.
 
 ## How this package is organised
 
@@ -40,8 +28,7 @@ whole public API, flat role-suffixed files, tests beside what they test.
 
 ```
 src/
-  index.ts                  the package's public API: TTY, plus the protocol types
-  protocol/                 wire messages: contracts, parse (validator), encode (mapper). A leaf.
+  index.ts                  the package's public API: TTY
   transport/                the WebSocket client; queues sends until the socket opens
   terminal-view/            xterm.js, and the keyboard-trap escape policy
   accessibility-layer/      the hidden ARIA tree and live regions, from a snapshot
@@ -49,7 +36,7 @@ src/
 ```
 
 Dependencies point one way: `tty` → `terminal-view`, `accessibility-layer`,
-`transport` → `protocol`. Enforced by `npm run lint` (`verticalSlices` in the root
+`transport` → `@trectui/protocol`. Enforced by `npm run lint` (`verticalSlices` in the root
 `eslint.config.mjs`).
 
 ## Building and testing

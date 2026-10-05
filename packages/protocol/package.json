@@ -1,5 +1,5 @@
 {
-  "name": "@trectui/tty",
+  "name": "@trectui/protocol",
   "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.esm.js",
@@ -19,17 +19,8 @@
     "!**/*.d.ts.map",
     "!**/*.js.map"
   ],
-  "nx": {
-    "name": "tty"
-  },
+  "dependencies": {},
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@trectui/protocol": "^0.0.1",
-    "@xterm/addon-fit": "^0.11.0",
-    "@xterm/xterm": "^6.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
   }
 }

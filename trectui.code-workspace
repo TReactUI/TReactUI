@@ -130,6 +130,20 @@
         "script": "demo:start",
         "problemMatcher": [],
         "isBackground": true
+      },
+      {
+        "label": "protocol: qa",
+        "type": "npm",
+        "script": "protocol:qa",
+        "problemMatcher": [],
+        "group": "qa"
+      },
+      {
+        "label": "protocol: build",
+        "type": "npm",
+        "script": "protocol:build",
+        "problemMatcher": [],
+        "group": "build"
       }
     ]
   },

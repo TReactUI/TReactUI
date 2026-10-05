@@ -1,4 +1,4 @@
-import type { A11yNode } from '../protocol'
+import type { A11yNode } from '@trectui/protocol'
 
 const ROLES_WITH_OWN_TEXT = new Set(['text', 'textbox', 'button', 'heading', 'listitem', 'option', 'status'])
 

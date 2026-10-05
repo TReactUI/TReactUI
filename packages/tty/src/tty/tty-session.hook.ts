@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { A11ySnapshot, Politeness } from '../protocol'
+import type { A11ySnapshot, Politeness } from '@trectui/protocol'
 import { openTtyConnection } from '../transport'
 import type { TtyConnection } from '../transport'
 import type { TTYProps } from './tty-props.contract'

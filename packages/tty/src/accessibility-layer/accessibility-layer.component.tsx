@@ -1,4 +1,4 @@
-import type { A11ySnapshot, Politeness } from '../protocol'
+import type { A11ySnapshot, Politeness } from '@trectui/protocol'
 import { A11yNodeView } from './a11y-node.component'
 import { visuallyHidden } from './visually-hidden.style'
 

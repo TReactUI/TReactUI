@@ -1,4 +1,4 @@
-import type { A11ySnapshot } from './a11y-snapshot.contract'
+import type { A11ySnapshot } from '../a11y-snapshot'
 
 /** How urgently a screen reader should interrupt to read an announcement. */
 export type Politeness = 'polite' | 'assertive'

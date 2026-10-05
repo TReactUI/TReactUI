@@ -21,7 +21,9 @@
     "demo-server:start": "nx run demo-server:start",
     "demo:qa": "nx run demo:lint && nx run demo:test",
     "demo:build": "nx run demo:build",
-    "demo:start": "nx run demo:serve"
+    "demo:start": "nx run demo:serve",
+    "protocol:qa": "nx run protocol:lint && nx run protocol:test",
+    "protocol:build": "nx run protocol:build"
   },
   "private": true,
   "devDependencies": {
@@ -42,8 +44,10 @@
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@swc-node/register": "1.11.1",
+    "@swc/cli": "~0.8.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
+    "@swc/jest": "~0.2.38",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.3.0",
     "@types/jest": "~30.0.0",
@@ -59,10 +63,12 @@
     "husky": "^9.1.7",
     "jest": "~30.3.0",
     "jest-environment-jsdom": "~30.3.0",
+    "jest-environment-node": "~30.3.0",
     "jest-util": "~30.3.0",
     "jiti": "2.4.2",
     "nx": "23.2.0",
     "rollup": "^4.14.0",
+    "swc-loader": "0.1.15",
     "ts-jest": "^29.4.7",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
@@ -110,5 +116,6 @@
         }
       }
     }
-  }
+  },
+  "dependencies": {}
 }

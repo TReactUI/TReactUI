@@ -33,5 +33,10 @@
     "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../protocol/tsconfig.lib.json"
+    }
   ]
 }

@@ -1,4 +1,4 @@
-import type { ClientMessage, ServerMessage } from '../protocol'
+import type { ClientMessage, ServerMessage } from '@trectui/protocol'
 
 /** The slice of the WebSocket API the connection relies on; lets tests supply a fake. */
 export interface SocketLike {
