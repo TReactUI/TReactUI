@@ -1,109 +1,111 @@
-# New Nx Repository
+# TReactUI
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A real terminal in the browser, with an accessibility layer, for any React app.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+You have a program with a good terminal interface (a Bubble Tea app, a commander CLI, an Ink app, a Python
+script). TReactUI shows that same program in a web page, as a real terminal ([xterm.js](https://xtermjs.org)) with
+mouse and keyboard, and adds what a terminal cannot give a screen reader: the program describes its screen
+(headings, lists, the selected item, progress) and the page renders that as real ARIA, hidden visually, next to
+the terminal.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/docs/technologies/typescript/introduction?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+It is aimed at a program you run on your own machine and open in a local page. Mobile is out of scope.
 
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/get-started). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
+> **Status:** pre-1.0 (`0.0.x`). Expect changes. The accessibility work has been checked with axe and a scripted
+> NVDA pass; a manual pass by someone who uses NVDA every day is still open
+> ([#4](https://github.com/TReactUI/TReactUI/issues/4), checklist in [docs/accessibility.md](docs/accessibility.md)).
 
-## Generate a library
+## Quickstart
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx run pkg1:build
-```
-
-To run any task with Nx use:
+**The page (React).** Your bundler must be able to import CSS.
 
 ```sh
-npx nx run <project-name>:<target>
+npm install @treactui/tty
 ```
 
-These targets are either [inferred automatically](https://nx.dev/docs/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+```tsx
+import { TTY } from '@treactui/tty'
 
-[More about running tasks in the docs &raquo;](https://nx.dev/docs/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
+<TTY url="ws://localhost:8080/term" />
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/docs/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+**A program in any language: `treactui serve`.** It runs the program under a pseudo-terminal, one copy per
+browser, and serves it on that URL. Everything after `--` is the program and its arguments.
 
 ```sh
-npx nx sync
+npm install --save-dev @treactui/tty-node
+npx treactui serve --origin localhost:4200 -- python app.py
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+`--origin` is the address of your page. Only same-host pages and the ones you list may connect, and the server
+listens on `127.0.0.1` only, because it runs programs. A Python program can describe its screen for a screen
+reader with [`treactui_tty`](integrations/python); see
+[Integrating another language](docs/integrating-a-language.md) for that and for other languages.
+
+**A commander CLI, with a launcher.** The page shows an accessible form built from your commands, arguments and
+options, and runs the one the user picks.
+
+```js
+import { serveCommander } from '@treactui/tty-node'
+
+await serveCommander({
+  program,                                  // your commander Command
+  command: process.execPath,
+  args: ['cli.js'],
+  allowedOrigins: ['localhost:4200'],
+})
+```
+
+**An Ink app, in-process** (no pseudo-terminal, no native module): `serveInk`, see
+[`@treactui/tty-node`](packages/tty-node#ink-in-process).
+
+**A Bubble Tea app (Go).**
+
+```go
+import ttygo "github.com/TReactUI/TReactUI"
+
+mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))
+```
+
+A model that implements `ttygo.Accessible` describes its screen; a command can return `ttygo.AnnounceMsg` to have
+a screen reader speak. See [`tty-go`](packages/tty-go).
+
+## What is in this repository
+
+| | |
+|---|---|
+| [`packages/tty`](packages/tty) | `@treactui/tty`: the React `TTY` component, the accessibility layer and the command launcher |
+| [`packages/tty-node`](packages/tty-node) | `@treactui/tty-node`: serve a Node program, an Ink app or any command; the `treactui` command |
+| [`packages/tty-go`](packages/tty-go) | The Go adapter for Bubble Tea |
+| [`packages/protocol`](packages/protocol) | `@treactui/protocol`: the wire protocol, its JSON Schemas and shared conformance cases |
+| [`integrations/python`](integrations/python) | `treactui_tty`: lets a served Python program describe its screen |
+| [`apps/demo`](apps/demo), [`apps/demo-server`](apps/demo-server) | A Vite page, and a Go to-do list to serve to it |
+| [`examples/`](examples) | `commander-cli`, `ink-app`, `python-app`, and `mvd-server` (needs a sibling checkout of the mvd repository) |
+| [`docs/`](docs) | [Accessibility](docs/accessibility.md): what was checked and what was not. [Integrating another language](docs/integrating-a-language.md) |
+
+How it works: one WebSocket carries JSON messages. The backend sends the terminal's output and, optionally, a
+description of the screen, announcements and events; the page sends keystrokes, resizes and, for a launcher,
+the command to run. The messages are defined in [`@treactui/protocol`](packages/protocol).
+
+## Trying it
 
 ```sh
-npx nx sync:check
+npm ci
+npx nx start demo-server     # a Go to-do list on ws://localhost:8080/term
+npx nx serve demo            # the page, at http://localhost:4200
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+Other combinations are in each example's README.
 
-## Nx Cloud
+## Contributing
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/docs/features/ci-features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/docs/features/ci-features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/docs/features/ci-features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/docs/features/ci-features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/docs/features/ci-features?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/docs/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## 🔗 Learn More
-
-- [Nx Documentation](https://nx.dev/docs)
-- [Crafting Your Workspace Tutorial](https://nx.dev/docs/getting-started/tutorials/crafting-your-workspace)
-- [Module Boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
-- [Releasing Packages](https://nx.dev/docs/features/manage-releases)
-- [Nx Plugins](https://nx.dev/docs/concepts/nx-plugins)
-- [Nx Cloud](https://nx.dev/nx-cloud)
-
-## 💬 Community
-
-Join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+- **Issues first.** Open a GitHub issue with acceptance criteria before building, reference it in the commit
+  (`Refs #12`), and close it when it is released.
+- **Commits** follow [Conventional Commits](https://www.conventionalcommits.org) and are checked by commitlint
+  (a lowercase subject, a header of at most 100 characters). `feat` and `fix` commits release.
+- **The gate** is what CI runs: `npx nx run-many -t lint typecheck test build`. Go needs Go 1.24 or newer;
+  the Python tests need Python 3.
+- **Every push to `main` can publish to public npm.** CI runs `nx release`, which versions and publishes the
+  packages that have `feat` or `fix` commits since their last release.
+- **Structure** is vertical feature slices: a folder per outcome with an `index.ts` as its whole public API, and
+  files named for their role (`.use-case.ts`, `.contract.ts`, `.algorithm.ts`...). `npm run lint` enforces it.
+- The workspace is built with [Nx](https://nx.dev) and was scaffolded with MNCI.
