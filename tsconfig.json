@@ -11,6 +11,9 @@
     },
     {
       "path": "./packages/protocol"
+    },
+    {
+      "path": "./packages/tty-node"
     }
   ],
   "compilerOptions": {}

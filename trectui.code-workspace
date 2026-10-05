@@ -144,6 +144,20 @@
         "script": "protocol:build",
         "problemMatcher": [],
         "group": "build"
+      },
+      {
+        "label": "tty-node: qa",
+        "type": "npm",
+        "script": "tty-node:qa",
+        "problemMatcher": [],
+        "group": "qa"
+      },
+      {
+        "label": "tty-node: build",
+        "type": "npm",
+        "script": "tty-node:build",
+        "problemMatcher": [],
+        "group": "build"
       }
     ]
   },

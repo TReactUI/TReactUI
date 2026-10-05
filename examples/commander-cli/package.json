@@ -1,0 +1,12 @@
+{
+  "name": "@trectui/example-commander-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A commander CLI served to @trectui/tty.",
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "@trectui/tty-node": "^0.0.1",
+    "commander": "^15.0.0"
+  }
+}
