@@ -19,6 +19,13 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
 - Only same-host pages may connect unless `Options.AllowedOrigins` says otherwise.
   The endpoint runs a program, so a foreign page must not be able to open it.
 
+## Commands
+
+The protocol's command catalog (`commands`, `run`, `stop`) is mirrored in `protocol/`, so a Go backend can
+speak it. This adapter does not run a launcher session itself yet: a handler that wants one sends
+`NewCommandsFrame` and handles `run`/`stop` messages. Incoming `resize` and `run` messages are bounded the
+same way as in `@trectui/protocol`.
+
 ## Layout
 
 Slices are Go packages, with files named `<name>_<role>.go`.

@@ -51,12 +51,18 @@ type ServerFrame struct {
 	Politeness string    `json:"politeness,omitempty"`
 	Name       string    `json:"name,omitempty"`
 	Payload    any       `json:"payload,omitempty"`
+	// Commands, with Type "commands", is what the browser may run; it then offers a launcher.
+	// A pointer, so that an empty list is still sent (omitempty drops an empty slice).
+	Commands *[]CommandSpec `json:"commands,omitempty"`
 }
 
-// ClientMessage is a browser-to-backend message: "input" or "resize".
+// ClientMessage is a browser-to-backend message: "input", "resize", "run" or "stop".
 type ClientMessage struct {
 	Type string `json:"type"`
 	Data string `json:"data,omitempty"`
 	Cols int    `json:"cols,omitempty"`
 	Rows int    `json:"rows,omitempty"`
+	// Command and Args, with Type "run", name one of the offered commands and its arguments.
+	Command string   `json:"command,omitempty"`
+	Args    []string `json:"args,omitempty"`
 }
