@@ -79,6 +79,16 @@ await serveCommander({ program, command: process.execPath, args: ['cli.js'], all
 The program is read for its metadata only (any commander 11+ `Command` fits; this package does not
 depend on commander). A nested command is offered by its path, `remote add`.
 
+## On Windows
+
+Programs run under the ConPTY that ships inside node-pty (`useConptyDll`), not the one in the operating
+system: node-pty's default `kill()` prints an `AttachConsole failed` stack trace every time a session ends.
+
+The bundled ConPTY asks the terminal what it is (`ESC [ c`) when it starts and waits up to 3 seconds for the
+answer. A browser page with xterm.js answers at once (first output in about 150 ms, measured), so this only
+matters for a client that is not a terminal emulator and does not answer: it sees the program's first output
+about 3 seconds late. Answer with `ESC [ ? 1 ; 0 c` to avoid it.
+
 ## Security
 
 The endpoint runs programs, so it is closed by default:

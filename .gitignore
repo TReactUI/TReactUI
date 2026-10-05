@@ -67,3 +67,6 @@ vite.config.*.timestamp*
 # Python bytecode (integrations/python)
 __pycache__/
 *.pyc
+
+# Playwright MCP scratch folder
+.playwright-mcp/

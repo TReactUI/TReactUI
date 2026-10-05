@@ -20,7 +20,17 @@ export const spawnWithNodePty: SpawnPty = async (command, args, options): Promis
   const pty = await import('node-pty')
   const env = Object.fromEntries(Object.entries(options.env).filter((entry): entry is [string, string] => entry[1] !== undefined))
   const file = findExecutable(command, { platform: process.platform, env: options.env, exists: isProgramFile })
-  const child = pty.spawn(file, args, { name: 'xterm-256color', cols: options.cols, rows: options.rows, cwd: options.cwd, env })
+  const child = pty.spawn(file, args, {
+    name:         'xterm-256color',
+    cols:         options.cols,
+    rows:         options.rows,
+    cwd:          options.cwd,
+    env,
+    // Windows only (ignored elsewhere). node-pty's default kill() forks a helper to list the console's
+    // processes while it closes that console, so the helper loses the race and prints a
+    // `AttachConsole failed` stack trace every time a session ends. The bundled ConPTY has no helper.
+    useConptyDll: process.platform === 'win32',
+  })
 
   return {
     onData: handler => child.onData(handler),
