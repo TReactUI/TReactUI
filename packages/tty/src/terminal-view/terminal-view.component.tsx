@@ -59,5 +59,5 @@ export function TerminalView ({ onReady, onInput, onResize, screenReaderMode, fo
     if (terminalRef.current !== undefined) terminalRef.current.options.screenReaderMode = screenReaderMode
   }, [screenReaderMode])
 
-  return <div ref={containerRef} aria-label={ariaLabel} style={{ flex: 1, minHeight: 0 }} />
+  return <div ref={containerRef} role='group' aria-label={ariaLabel} style={{ flex: 1, minHeight: 0 }} />
 }

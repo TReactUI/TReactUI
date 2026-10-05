@@ -34,7 +34,7 @@ const headerLines = 2
 var (
 	titleStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7dd3fc"))
 	selectedStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#0f172a")).Background(lipgloss.Color("#7dd3fc"))
-	doneStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#64748b")).Strikethrough(true)
+	doneStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#7c8ba1")).Strikethrough(true)
 	helpStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#94a3b8"))
 )
 
