@@ -1,0 +1,53 @@
+{
+  "name": "demo-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/demo-server",
+  "tags": [
+    "type:go-app"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/demo-server"
+      ],
+      "options": {
+        "outputPath": "../../dist/apps/demo-server/demo-server"
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint",
+      "parallelism": false,
+      "options": {
+        "linter": "golangci-lint",
+        "args": [
+          "run"
+        ]
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/drop/go-app-demo-server.zip"
+      ],
+      "options": {
+        "command": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist/drop',{recursive:true});const A=require('adm-zip');const z=new A();z.addLocalFolder('dist/apps/demo-server');z.writeZip('dist/drop/go-app-demo-server.zip')\""
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "go run .",
+        "cwd": "apps/demo-server"
+      }
+    }
+  }
+}

@@ -53,3 +53,10 @@ Thumbs.db
 .eslintcache
 
 test-output
+
+vite.config.*.timestamp*
+
+# MoNecromanCI: keep the committed per-environment Vite config (public VITE_ values)
+!apps/*/.env.dev
+!apps/*/.env.uat
+!apps/*/.env.prod

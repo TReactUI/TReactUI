@@ -5,33 +5,22 @@
 // upgrade — so put your changes here, not there.
 import mnci from './eslint.config.mnci.mjs'
 
-// TO CONFIGURE the shared rules, pass options to mnci() below — e.g.
-// `...mnci({ verticalSlices: ['packages/*/src/**/*.ts'] })`.
-//
-// TO OVERRIDE a rule, append a block AFTER the spread — later blocks win, so
-// one of your own beats anything above it. Give it a name, so
-// `npx eslint --inspect-config` shows where the change came from:
-//
-//   {
-//     name: 'local/legacy-app-allows-any',
-//     files: ['apps/legacy/**/*.ts'],
-//     rules: { '@typescript-eslint/no-explicit-any': 'off' }
-//   }
-//
-// Do NOT edit @mnci/eslint-config inside node_modules, and do not fork it: it
-// is a dependency, so `npm update` brings rule fixes in the way it brings any
-// other. An override here survives that; an edit to the package does not.
 export default [
   ...mnci({
     verticalSlices: {
-      files: ['packages/*/src/**/*.{ts,tsx}'],
+      files: ['packages/*/src/**/*.{ts,tsx}', 'apps/demo/src/**/*.{ts,tsx}'],
       roles: ['style', 'hook', 'mock', 'fixture'],
     },
   }),
   {
     // `TTY` is the library's public name, chosen by the author; it is an acronym, not PascalCase.
     name:  'local/tty-component-name',
-    files: ['packages/tty/src/**/*.tsx'],
+    files: ['packages/tty/src/**/*.tsx', 'apps/demo/src/**/*.tsx'],
     rules: { '@stylistic/jsx-pascal-case': ['error', { allowAllCaps: true }] },
+  },
+  {
+    ignores: [
+      '**/vite.config.*.timestamp*',
+    ],
   },
 ]

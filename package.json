@@ -14,7 +14,14 @@
     "format": "eslint . --fix --cache",
     "python:install": "node -e \"if(!require('node:fs').existsSync('requirements-dev.txt')){console.log('No Python projects - skipping.');process.exit(0)}const py=process.platform==='win32'?'python':'python3';process.exit(require('node:child_process').spawnSync(py+' -m pip install -r requirements-dev.txt',{stdio:'inherit',shell:true}).status ?? 1)\" && node -e \"const fs=require('node:fs'),path=require('node:path');const editableDirs=[...fs.globSync('apps/*/pyproject.toml'),...fs.globSync('python-packages/*/pyproject.toml'),...fs.globSync('libs/*/pyproject.toml')].map((p)=>path.dirname(p));const requirementsFiles=fs.globSync('apps/*/requirements.txt');if(editableDirs.length===0&&requirementsFiles.length===0){console.log('No Python projects - skipping.');process.exit(0)}const args=['-m','pip','install','--quiet',...editableDirs.flatMap((d)=>['-e',d]),...requirementsFiles.flatMap((f)=>['-r',f])];const py=process.platform==='win32'?'python':'python3';process.exit(require('node:child_process').spawnSync(py,args,{stdio:'inherit'}).status ?? 1)\"",
     "tty:qa": "nx run tty:lint && nx run tty:test",
-    "tty:build": "nx run tty:build"
+    "tty:build": "nx run tty:build",
+    "tty-go:qa": "nx run tty-go:lint && nx run tty-go:test",
+    "demo-server:qa": "nx run demo-server:lint && nx run demo-server:test",
+    "demo-server:build": "nx run demo-server:build",
+    "demo-server:start": "nx run demo-server:start",
+    "demo:qa": "nx run demo:lint && nx run demo:test",
+    "demo:build": "nx run demo:build",
+    "demo:start": "nx run demo:serve"
   },
   "private": true,
   "devDependencies": {
@@ -23,12 +30,15 @@
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@mnci/eslint-config": ">=0.1.0 <1.0.0",
+    "@nx-go/nx-go": "^4.1.1",
     "@nx/eslint": "23.2.0",
     "@nx/eslint-plugin": "23.2.0",
     "@nx/jest": "23.2.0",
     "@nx/js": "23.2.0",
     "@nx/react": "^23.2.0",
     "@nx/rollup": "23.2.0",
+    "@nx/vite": "23.2.0",
+    "@nx/web": "23.2.0",
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@swc-node/register": "1.11.1",
@@ -41,6 +51,8 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitejs/plugin-react": "^6.0.0",
+    "adm-zip": "^0.6.1",
     "babel-jest": "~30.3.0",
     "core-js": "^3.36.1",
     "eslint": "^10.8.0",
@@ -48,15 +60,18 @@
     "jest": "~30.3.0",
     "jest-environment-jsdom": "~30.3.0",
     "jest-util": "~30.3.0",
+    "jiti": "2.4.2",
     "nx": "23.2.0",
     "rollup": "^4.14.0",
     "ts-jest": "^29.4.7",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.0.0"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "overrides": {
     "eslint-plugin-jsx-a11y": {

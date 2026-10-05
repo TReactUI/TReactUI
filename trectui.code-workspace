@@ -81,6 +81,55 @@
         "script": "tty:build",
         "problemMatcher": [],
         "group": "build"
+      },
+      {
+        "label": "tty-go: qa",
+        "type": "npm",
+        "script": "tty-go:qa",
+        "problemMatcher": [],
+        "group": "qa"
+      },
+      {
+        "label": "demo-server: qa",
+        "type": "npm",
+        "script": "demo-server:qa",
+        "problemMatcher": [],
+        "group": "qa"
+      },
+      {
+        "label": "demo-server: build",
+        "type": "npm",
+        "script": "demo-server:build",
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "demo-server: start",
+        "type": "npm",
+        "script": "demo-server:start",
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "demo: qa",
+        "type": "npm",
+        "script": "demo:qa",
+        "problemMatcher": [],
+        "group": "qa"
+      },
+      {
+        "label": "demo: build",
+        "type": "npm",
+        "script": "demo:build",
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "demo: start",
+        "type": "npm",
+        "script": "demo:start",
+        "problemMatcher": [],
+        "isBackground": true
       }
     ]
   },
