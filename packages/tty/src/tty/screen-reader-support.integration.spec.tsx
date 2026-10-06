@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import type { SocketLike } from '../transport'
 import { TTY } from './tty.component'
 
@@ -18,6 +18,7 @@ jest.mock('@xterm/xterm', () => ({
     attachCustomKeyEventHandler (handler: KeyHandler) { keyHandlers.push(handler) }
     onData () {}
     onResize () {}
+    onScroll () {}
     blur () {}
     focus () {}
     dispose () {}
@@ -61,7 +62,7 @@ const politeRegion = () => screen.getAllByRole('status').at(-1)
 describe('TTY for screen reader users', () => {
   beforeEach(() => { keyHandlers.length = 0 })
 
-  it('announces the new selection when the selected option changes, but not the first screen', () => {
+  it('announces the new selection when the selected option changes, but not the first screen', async () => {
     const backend = connectedSocket()
     render(<TTY url='ws://x' createSocket={() => backend.socket} />)
 
@@ -71,8 +72,26 @@ describe('TTY for screen reader users', () => {
     backend.deliver(screenWithSelection(1))
     expect(politeRegion()?.textContent).toBe('Second task')
 
+    // Announcements are paced (a second one within the interval is held), so the next one is a moment away.
     backend.deliver(screenWithSelection(2))
-    expect(politeRegion()?.textContent).toBe('Third task')
+    await waitFor(() => expect(politeRegion()?.textContent).toBe('Third task'))
+  })
+
+  it('keeps a quick run of selection changes to a pace a screen reader can follow: the first at once, then only the last', async () => {
+    const backend = connectedSocket()
+    render(<TTY url='ws://x' createSocket={() => backend.socket} />)
+    const seen: string[] = []
+    new MutationObserver(() => { seen.push(politeRegion()?.textContent ?? '') }).observe(politeRegion() as Node, { childList: true, characterData: true, subtree: true })
+    backend.deliver(screenWithSelection(0))
+
+    // Holding the arrow key down: every option in turn, and back, within a few milliseconds.
+    for (const index of [1, 2, 3, 4, 3, 2, 1, 2]) backend.deliver(screenWithSelection(index))
+
+    await waitFor(() => expect(politeRegion()?.textContent).toBe('Third task'))
+    const spoken = seen.filter(text => text !== '')
+    expect(spoken[0]).toBe('Second task')
+    expect(spoken.at(-1)).toBe('Third task')
+    expect(spoken.length).toBeLessThanOrEqual(2)
   })
 
   it('says nothing when a redraw leaves the selection where it was', () => {

@@ -4,6 +4,8 @@ import '@xterm/xterm/css/xterm.css'
 import { useEffect, useRef } from 'react'
 import { isFocusEscapeChord } from './focus-escape.policy'
 import { readBufferLines } from './read-buffer-lines.algorithm'
+import { lostAnOldLine } from './scroll-trim.algorithm'
+import { SCROLLBACK_LINES } from './scrollback.config'
 import type { TerminalViewProps } from './terminal-view.contract'
 
 /** A real terminal (xterm.js, DOM renderer). */
@@ -25,7 +27,7 @@ export function TerminalView ({
 
     // convertEol: a real TTY turns "\n" into "\r\n" on output, and TUI renderers
     // such as Bubble Tea rely on that; without it the cursor keeps its column.
-    const terminal = new Terminal({ convertEol: true, screenReaderMode: screenReaderModeRef.current, cursorBlink: true })
+    const terminal = new Terminal({ convertEol: true, screenReaderMode: screenReaderModeRef.current, cursorBlink: true, scrollback: SCROLLBACK_LINES })
     terminalRef.current = terminal
     const fit = new FitAddon()
     terminal.loadAddon(fit)
@@ -50,13 +52,22 @@ export function TerminalView ({
 
       return true
     })
+    // The terminal keeps a bounded scrollback; count what it throws away, so that what is read back from it can
+    // say that it is not the whole output.
+    let droppedLines = 0
+    let lengthBefore = terminal.buffer.active.length
+    terminal.onScroll(() => {
+      const lengthAfter = terminal.buffer.active.length
+      if (lostAnOldLine(lengthBefore, lengthAfter, SCROLLBACK_LINES + terminal.rows)) droppedLines++
+      lengthBefore = lengthAfter
+    })
     terminal.onData(data => callbacksRef.current.onInput(data))
     terminal.onResize(({ cols, rows }) => callbacksRef.current.onResize(cols, rows))
     callbacksRef.current.onResize(terminal.cols, terminal.rows)
     callbacksRef.current.onReady({
       write:     data => terminal.write(data),
       // An empty write completes after everything queued before it has been parsed.
-      readLines: async () => new Promise(resolve => terminal.write('', () => resolve(readBufferLines(terminal.buffer.active)))),
+      readLines: async () => new Promise(resolve => terminal.write('', () => resolve({ lines: readBufferLines(terminal.buffer.active), droppedLines }))),
     })
     if (focusOnMountRef.current) terminal.focus()
 

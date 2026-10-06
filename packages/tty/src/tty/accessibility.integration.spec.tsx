@@ -19,6 +19,7 @@ jest.mock('@xterm/xterm', () => ({
     attachCustomKeyEventHandler () {}
     onData () {}
     onResize () {}
+    onScroll () {}
     blur () {}
     focus () {}
     dispose () {}

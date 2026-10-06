@@ -1,8 +1,10 @@
 import type { A11ySnapshot, CommandSpec, Politeness } from '@treactui/protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { selectedOptionLabel } from '../accessibility-layer'
+import type { TerminalText } from '../terminal-view'
 import { openTtyConnection } from '../transport'
 import type { TtyConnection } from '../transport'
+import { createAnnouncementLimiter } from './announcement-limiter.store'
 import type { TTYProps } from './tty-props.contract'
 
 interface TtySessionOptions extends Pick<TTYProps, 'url' | 'onEvent' | 'createSocket'> {
@@ -16,12 +18,14 @@ interface TtySessionOptions extends Pick<TTYProps, 'url' | 'onEvent' | 'createSo
 export type TtyPhase = 'terminal' | 'choosing' | 'running' | 'finished'
 
 export interface RunSummary {
-  command:   string
-  exitCode?: number
+  command:       string
+  exitCode?:     number
   /** The user pressed Stop, so the exit code is the platform's kill status, not news. */
-  stopped?:  boolean
-  /** What the command printed, once it has ended. */
-  output?:   string[]
+  stopped?:      boolean
+  /** What the command printed, once it has ended: what the terminal still holds. */
+  output?:       string[]
+  /** How many earlier lines the terminal had already discarded. The output is then only the end of what was printed. */
+  droppedLines?: number
 }
 
 interface TtySession {
@@ -37,7 +41,7 @@ interface TtySession {
   /** Call when the terminal exists, so a requested run can start at its size. */
   terminalReady:  () => void
   /** Keeps what the finished command printed, so it can be offered as text. */
-  recordOutput:   (lines: string[]) => void
+  recordOutput:   (text: TerminalText) => void
   stop:           () => void
   backToCommands: () => void
 }
@@ -62,6 +66,8 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
   handlersRef.current = { onEvent, onOutput }
 
   useEffect(() => {
+    // However fast the backend announces, a screen reader is given a pace it can follow.
+    const announcements = createAnnouncementLimiter(setAnnouncement)
     const opened = openTtyConnection({
       url,
       createSocket,
@@ -74,14 +80,14 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
           case 'a11y-snapshot': {
             const selected = selectedOptionLabel(message.snapshot)
             if (selected !== undefined && selectedRef.current !== undefined && selected !== selectedRef.current) {
-              setAnnouncement({ text: selected, politeness: 'polite' })
+              announcements.offer({ text: selected, politeness: 'polite' })
             }
             selectedRef.current = selected
             setSnapshot(message.snapshot)
             break
           }
           case 'announce': {
-            setAnnouncement({ text: message.text, politeness: message.politeness })
+            announcements.offer({ text: message.text, politeness: message.politeness })
             break
           }
           case 'commands': {
@@ -107,6 +113,7 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
     if (sizeRef.current !== undefined) opened.send({ type: 'resize', ...sizeRef.current })
 
     return () => {
+      announcements.dispose()
       opened.close()
       connectionRef.current = undefined
     }
@@ -127,8 +134,8 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
     pendingRunRef.current = undefined
     if (pending !== undefined) connectionRef.current?.send({ type: 'run', ...pending })
   }, [])
-  const recordOutput = useCallback((lines: string[]) => {
-    setRun(current => current === undefined ? current : { ...current, output: lines })
+  const recordOutput = useCallback(({ lines, droppedLines }: TerminalText) => {
+    setRun(current => current === undefined ? current : { ...current, output: lines, droppedLines })
   }, [])
   const stop = useCallback(() => {
     setRun(current => current === undefined ? current : { ...current, stopped: true })

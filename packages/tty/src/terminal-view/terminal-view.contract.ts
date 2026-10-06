@@ -1,12 +1,19 @@
+/** What the terminal holds, which is not always everything that was written to it. */
+export interface TerminalText {
+  /** The text now on the terminal, one string per line. */
+  lines:        string[]
+  /** How many older lines scrolled out of the terminal's scrollback and are gone. */
+  droppedLines: number
+}
+
 /** What the rest of the library may do to the terminal. */
 export interface TerminalHandle {
   write:     (data: string) => void
   /**
-   * The text now on the terminal, one string per line. Resolves once everything
-   * written so far has been processed, so it is safe to call right after the
-   * last output arrived.
+   * The text now on the terminal. Resolves once everything written so far has been
+   * processed, so it is safe to call right after the last output arrived.
    */
-  readLines: () => Promise<string[]>
+  readLines: () => Promise<TerminalText>
 }
 
 export interface TerminalViewProps {

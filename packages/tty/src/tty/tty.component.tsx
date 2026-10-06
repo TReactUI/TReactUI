@@ -28,8 +28,8 @@ export function TTY ({ url, label = 'Terminal', className, onEvent, createSocket
   useEffect(() => {
     if (phase !== 'finished') return
     let cancelled = false
-    void (terminalRef.current?.readLines() ?? Promise.resolve([])).then(lines => {
-      if (!cancelled) recordOutput(lines)
+    void (terminalRef.current?.readLines() ?? Promise.resolve({ lines: [], droppedLines: 0 })).then(text => {
+      if (!cancelled) recordOutput(text)
     })
 
     return () => {
@@ -88,8 +88,8 @@ export function TTY ({ url, label = 'Terminal', className, onEvent, createSocket
           {run.output !== undefined && (
             <>
               {/* Only the button's description: aria-hidden keeps it from being read a second time in browse mode. */}
-              <span id={summaryId} aria-hidden='true' style={visuallyHidden}>{`${exitSummary(run)}. ${summarizeCommandOutput(run.output)}`}</span>
-              <section aria-label={`Output of ${run.command}`} style={visuallyHidden}>
+              <span id={summaryId} aria-hidden='true' style={visuallyHidden}>{`${exitSummary(run)}. ${summarizeCommandOutput(run.output, run.droppedLines)}`}</span>
+              <section aria-label={outputLabel(run)} style={visuallyHidden}>
                 <pre>{run.output.join('\n')}</pre>
               </section>
             </>
@@ -120,4 +120,13 @@ function exitSummary (run: RunSummary): string {
   if (run.stopped === true) return `${run.command} stopped`
 
   return `${run.command} exited${run.exitCode === undefined ? '' : ` with code ${run.exitCode}`}`
+}
+
+/** The label of the full output: it says so when only the end of what the command printed is there. */
+function outputLabel (run: RunSummary): string {
+  const dropped = run.droppedLines ?? 0
+
+  return dropped > 0
+    ? `Output of ${run.command}: the last ${run.output?.length ?? 0} lines; the first ${dropped} are no longer available`
+    : `Output of ${run.command}`
 }
