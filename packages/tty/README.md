@@ -34,6 +34,19 @@ Ctrl+Shift+M to leave the terminal and reach it by keyboard.
 Arguments reach the program as an argument list; a value that starts with a dash is passed after `--`, so
 typed text is never read as an option. A variadic argument is split on spaces.
 
+## Long output
+
+The terminal keeps the last 1 000 lines above its visible rows and discards older ones, which is what keeps the
+page's memory flat however long a program prints (500 000 lines: 15 MB to 17 MB, measured). When a launched command
+printed more than the terminal still holds, the summary read out when it ends says how many lines are gone and
+reads the last ones, and the output region's label says that it holds only the end.
+
+Announcements, from the backend or from the selection moving, are paced: the first is spoken at once and anything
+within the next 400 ms is held and replaced by the latest, so a program that announces in a loop, or an arrow key
+held down on a list, does not queue hundreds of utterances in a screen reader. A program that prints continuously is
+still read out continuously in the terminal's own region; see [docs/stress-test.md](../../docs/stress-test.md) for
+what was measured and what was not.
+
 ## The protocol
 
 The wire messages live in [`@treactui/protocol`](../protocol), shared with the backend

@@ -2,6 +2,7 @@
 // server does with the output it cannot deliver. When it reads again it checks that nothing was lost.
 //   node slow-reader.cjs <port> <serverPid> [secondsNotReading=20]
 // The served program is flood-output.cjs, whose lines are numbered.
+/* eslint-disable unicorn/no-process-exit -- a command-line tool: it ends the process when it has its answer. */
 const { execFileSync } = require('node:child_process')
 const { WebSocket } = require('ws')
 
@@ -54,22 +55,26 @@ socket.on('open', () => {
     const timer = setInterval(() => {
       const elapsed = Math.round((Date.now() - started) / 1000)
       console.log(`  ${String(elapsed).padStart(2)} s  server memory ${rssMb()} MB`)
-      if (elapsed >= Number(seconds)) {
-        clearInterval(timer)
-        console.log('--- the client reads again ---')
-        socket._socket.resume()
-        const waited = setInterval(() => {
-          if (done !== undefined) {
-            clearInterval(waited)
-            console.log(`received ${Math.round(bytes / 1024 / 1024)} MB: last line ${lastLine}, DONE says ${done}, lines out of order: ${outOfOrder}, server ${rssMb()} MB`)
-            console.log(lastLine === done && outOfOrder === 0 ? 'INTEGRITY OK: nothing lost, nothing reordered' : 'INTEGRITY FAILED')
-            socket.close()
-            process.exit(0)
-          }
-        }, 500)
-        setTimeout(() => { console.log(`gave up waiting: last line ${lastLine}, DONE ${done}`); process.exit(1) }, 120_000)
-      }
+      if (elapsed < Number(seconds)) return
+      clearInterval(timer)
+      console.log('--- the client reads again ---')
+      socket._socket.resume()
+      const waited = setInterval(() => {
+        if (done === undefined) return
+        clearInterval(waited)
+        console.log(`received ${Math.round(bytes / 1024 / 1024)} MB: last line ${lastLine}, DONE says ${done}, lines out of order: ${outOfOrder}, server ${rssMb()} MB`)
+        console.log(lastLine === done && outOfOrder === 0 ? 'INTEGRITY OK: nothing lost, nothing reordered' : 'INTEGRITY FAILED')
+        socket.close()
+        process.exit(0)
+      }, 500)
+      setTimeout(() => {
+        console.log(`gave up waiting: last line ${lastLine}, DONE ${done}`)
+        process.exit(1)
+      }, 120_000)
     }, 2000)
   }, 100)
 })
-socket.on('error', error => { console.log('error', error.message); process.exit(1) })
+socket.on('error', error => {
+  console.log('error', error.message)
+  process.exit(1)
+})
