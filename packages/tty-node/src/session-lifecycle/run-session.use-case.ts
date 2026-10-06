@@ -13,7 +13,12 @@ const DEFAULT_SIZE: TerminalSize = { cols: 80, rows: 24 }
  */
 export function runSession (transport: Transport, options: SessionOptions): void {
   const send = (message: ServerMessage): void => transport.send(encodeServerMessage(message))
-  const host = { send, close: () => transport.close() }
+  const host = {
+    send,
+    close:      () => transport.close(),
+    isBackedUp: () => transport.isBackedUp?.() ?? false,
+    onDrain:    (handler: () => void) => transport.onDrain?.(handler) ?? (() => {}),
+  }
 
   let size = DEFAULT_SIZE
   let started = false

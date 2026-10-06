@@ -43,7 +43,12 @@ export function runLauncherSession (transport: Transport, options: LauncherOptio
       const running = await startPtyProgram(
         { ...options, args: [...(options.args ?? []), ...command.name.split(' '), ...args] },
         size,
-        { send, close: finished },
+        {
+          send,
+          close:      finished,
+          isBackedUp: () => transport.isBackedUp?.() ?? false,
+          onDrain:    handler => transport.onDrain?.(handler) ?? (() => {}),
+        },
       )
       if (closed) running.dispose()
       else controller = running

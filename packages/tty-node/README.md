@@ -79,6 +79,16 @@ await serveCommander({ program, command: process.execPath, args: ['cli.js'], all
 The program is read for its metadata only (any commander 11+ `Command` fits; this package does not
 depend on commander). A nested command is offered by its path, `remote add`.
 
+## A slow browser
+
+A program that prints faster than the browser can read is made to wait, as it would on a slow terminal, instead of
+piling its output up in this process. When more than 1 MiB has been sent and not yet delivered, the program's
+output stops being read (its writes block); it is read again once the backlog is below 256 KiB. Nothing is
+dropped or reordered. Measured with a program printing 2 000 000 lines (150 MB) to a client that stopped reading:
+server memory stayed at about 85 MB, where it had grown to 350 MB before, and every line arrived afterwards, in
+order. This applies to programs run in a PTY (`serveCommand`, `serveCommander`); an Ink app served in-process
+writes from your own code, which this cannot pause.
+
 ## On Windows
 
 Programs run under the ConPTY that ships inside node-pty (`useConptyDll`), not the one in the operating

@@ -1,10 +1,13 @@
 /** The part of a pseudo-terminal the session uses; lets tests supply a fake. */
 export interface PtyLike {
-  onData: (handler: (data: string) => void) => void
-  onExit: (handler: (exitCode: number) => void) => void
-  write:  (data: string) => void
-  resize: (cols: number, rows: number) => void
-  kill:   () => void
+  onData:  (handler: (data: string) => void) => void
+  onExit:  (handler: (exitCode: number) => void) => void
+  write:   (data: string) => void
+  resize:  (cols: number, rows: number) => void
+  kill:    () => void
+  /** Stops reading the program's output, so that it blocks when the pipe is full. Optional: a fake need not. */
+  pause?:  () => void
+  resume?: () => void
 }
 
 export interface SpawnPtyOptions {

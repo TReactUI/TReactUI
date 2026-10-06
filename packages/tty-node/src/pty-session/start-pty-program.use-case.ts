@@ -28,6 +28,15 @@ export async function startPtyProgram (options: PtySessionOptions, size: Termina
     throw new Error(`Could not start ${options.command}: ${error instanceof Error ? error.message : String(error)}`, { cause: error })
   }
 
+  // When the browser falls behind, stop reading the program: its writes then block, as they would on a slow
+  // terminal, instead of piling up in this process without limit. Nothing is dropped.
+  let paused = false
+  const stopWatchingDrain = host.onDrain(() => {
+    if (!paused) return
+    paused = false
+    pty.resume?.()
+  })
+
   pty.onData(data => {
     const { output, messages } = extractor.push(data)
     if (output !== '') host.send({ type: 'output', data: output })
@@ -35,8 +44,13 @@ export async function startPtyProgram (options: PtySessionOptions, size: Termina
       const parsed = parseServerMessage(raw)
       if (parsed.ok && APP_MESSAGE_TYPES.has(parsed.message.type)) host.send(parsed.message)
     }
+    if (!paused && host.isBackedUp()) {
+      paused = true
+      pty.pause?.()
+    }
   })
   pty.onExit(exitCode => {
+    stopWatchingDrain()
     host.send({ type: 'event', name: 'exit', payload: { exitCode } })
     host.close()
   })

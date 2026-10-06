@@ -38,5 +38,7 @@ export const spawnWithNodePty: SpawnPty = async (command, args, options): Promis
     write:  data => child.write(data),
     resize: (cols, rows) => child.resize(cols, rows),
     kill:   () => child.kill(),
+    pause:  () => { child.pause() },
+    resume: () => { child.resume() },
   }
 }

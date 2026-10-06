@@ -15,9 +15,13 @@ export interface SessionController {
 
 /** What a starting program can say to the browser. */
 export interface SessionHost {
-  send:  (message: ServerMessage) => void
+  send:       (message: ServerMessage) => void
   /** Ends the connection, for instance when the program has exited. */
-  close: () => void
+  close:      () => void
+  /** True while the browser is behind, so a program that can wait should (see `onDrain`). */
+  isBackedUp: () => boolean
+  /** Calls `handler` each time a backed-up connection has caught up. Returns a function that stops it. */
+  onDrain:    (handler: () => void) => () => void
 }
 
 export interface SessionOptions {
