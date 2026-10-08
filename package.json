@@ -45,7 +45,7 @@
     "@nx/web": "23.2.1",
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
-    "@swc-node/register": "1.11.1",
+    "@swc-node/register": "1.12.1",
     "@swc/cli": "~0.8.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
