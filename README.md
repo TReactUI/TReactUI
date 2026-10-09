@@ -12,7 +12,7 @@ It is aimed at a program you run on your own machine and open in a local page. M
 
 > **Status:** pre-1.0 (`0.0.x`). Expect changes. The accessibility work has been checked with axe and a scripted
 > NVDA pass; a manual pass by someone who uses NVDA every day is still open
-> ([#4](https://github.com/TReactUI/TReactUI/issues/4), checklist in [docs/accessibility.md](docs/accessibility.md)).
+> ([#4](https://github.com/meta-tui/treactui/issues/4), checklist in [docs/accessibility.md](docs/accessibility.md)).
 
 ## Quickstart
 
@@ -61,7 +61,7 @@ await serveCommander({
 **A Bubble Tea app (Go).**
 
 ```go
-import ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
+import ttygo "github.com/meta-tui/treactui/packages/tty-go"
 
 mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))
 ```

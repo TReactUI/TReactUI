@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/protocol"
+	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
 
 // Observe wraps inner. After every update it sends an accessibility snapshot

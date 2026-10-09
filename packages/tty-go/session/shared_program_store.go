@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/observer"
-	"github.com/TReactUI/TReactUI/packages/tty-go/protocol"
+	"github.com/meta-tui/treactui/packages/tty-go/observer"
+	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
 
 // terminalPreamble is what Bubble Tea writes when a program starts (hide the

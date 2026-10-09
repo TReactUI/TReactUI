@@ -6,7 +6,7 @@ screen, with the loop between them, to prove the approach on an existing Bubble 
 application.
 
 It is its own Go module, with `replace` directives for local checkouts:
-`github.com/TReactUI/TReactUI => ../..` and `youtube-downloader => ../../../mvd`
+`github.com/meta-tui/treactui => ../..` and `youtube-downloader => ../../../mvd`
 (a sibling checkout of the mvd repository at `main`, which has `tui.NewAppModel` and
 `ScreenOutline` since mvd#53). It is not part of the root module or of CI.
 

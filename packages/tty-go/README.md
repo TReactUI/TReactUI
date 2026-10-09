@@ -5,7 +5,7 @@ the browser for [`@treactui/tty`](../tty): the real terminal output over a
 WebSocket, plus the semantic information assistive technology needs.
 
 ```sh
-go get github.com/TReactUI/TReactUI/packages/tty-go@latest
+go get github.com/meta-tui/treactui/packages/tty-go@latest
 ```
 
 It is a Go module of its own (`packages/tty-go/go.mod`), versioned by git tags named `packages/tty-go/vX.Y.Z`,
@@ -14,7 +14,7 @@ touched this folder since the last one (while the major version is 0, either bum
 `tools/go-release`). Pin a version in your `go.mod` as usual.
 
 ```go
-import ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
+import ttygo "github.com/meta-tui/treactui/packages/tty-go"
 
 mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.Options{}))
 ```

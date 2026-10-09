@@ -11,7 +11,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/protocol"
+	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
 
 type memoryTransport struct {
