@@ -88,6 +88,7 @@
     "examples/*"
   ],
   "overrides": {
+    "handlebars": "^4.7.10",
     "eslint-plugin-jsx-a11y": {
       "eslint": "$eslint"
     },
