@@ -69,7 +69,7 @@ export function useTtySession ({ url, onEvent, onOutput, createSocket }: TtySess
     // However fast the backend announces, a screen reader is given a pace it can follow.
     const announcements = createAnnouncementLimiter(setAnnouncement)
     const opened = openTtyConnection({
-      url,
+      url: url ?? '',
       createSocket,
       onMessage (message) {
         switch (message.type) {

@@ -22,6 +22,25 @@ launched command ends, its outcome and the first lines of its output are the "Ba
 description, and the full output is a labelled region of plain text. See `docs/accessibility.md`, which records
 what was verified with NVDA and what was not.
 
+## Without a server: over Wails events
+
+A Wails app does not need a WebSocket server. Give `TTY` a socket that talks through Wails' events instead, and serve the
+program on the Go side with `ttygo.Bind` or `ttygo.BindShared` (see [`tty-go`](../tty-go)):
+
+```tsx
+import { TTY, createWailsSocket } from '@treactui/tty'
+
+// Created once, outside the component: a new function on every render would reconnect the terminal each time.
+const wailsSocket = createWailsSocket()
+
+<TTY createSocket={wailsSocket} />
+```
+
+`url` is not needed then. `createWailsSocket({ prefix, runtime })` renames the two events (`<prefix>:up` and
+`<prefix>:down`, default `treactui`; the Go side must use the same) or supplies the runtime instead of `window.runtime`,
+which only a page served by Wails has. The page has to be served by Wails (not loaded from another address), because
+that is what injects `window.runtime`.
+
 ## Command launcher
 
 When the backend offers commands (a `commands` message, for example from `serveCommander` in
@@ -60,7 +79,7 @@ whole public API, flat role-suffixed files, tests beside what they test.
 ```
 src/
   index.ts                  the package's public API: TTY
-  transport/                the WebSocket client; queues sends until the socket opens
+  transport/                the WebSocket client (queues sends until the socket opens) and the Wails events socket
   command-launcher/         the accessible form: argument builder, validator and fields
   terminal-view/            xterm.js, and the keyboard-trap escape policy
   accessibility-layer/      the hidden ARIA tree and live regions, from a snapshot
