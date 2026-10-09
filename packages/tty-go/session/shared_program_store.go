@@ -67,6 +67,21 @@ func (s *SharedProgram) Attach(ctx context.Context, t Transport) error {
 	}
 }
 
+// Send delivers msg to the running program, as if a browser had caused it, and
+// reports whether a program was running. It is for the process that hosts the
+// program (a desktop window, a tray app) to talk to it: for example to send
+// the key that starts the program's own quit flow when the window is closed.
+func (s *SharedProgram) Send(msg tea.Msg) bool {
+	s.mu.Lock()
+	run := s.running
+	s.mu.Unlock()
+	if run == nil {
+		return false
+	}
+	run.program.Send(msg)
+	return true
+}
+
 // start returns the running program, or starts a new one.
 func (s *SharedProgram) start() *sharedRun {
 	s.mu.Lock()
