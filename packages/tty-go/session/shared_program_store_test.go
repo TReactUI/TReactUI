@@ -160,3 +160,20 @@ func TestSharedProgramThatNeverAsksForTheMouseDoesNotGetReports(t *testing.T) {
 		t.Error("mouse reporting should be off unless the program asks for it")
 	}
 }
+
+func TestHostCanSendAMessageToTheRunningProgram(t *testing.T) {
+	shared := NewSharedProgram(func() tea.Model { return echo{} })
+	if shared.Send(tea.KeyPressMsg{Code: 'x', Text: "x"}) {
+		t.Fatal("Send should report false while no program is running")
+	}
+	first := &memoryTransport{incoming: make(chan []byte, 8)}
+	cancelFirst, _ := attach(shared, first)
+	defer cancelFirst()
+	send(t, first, protocol.ClientMessage{Type: "resize", Cols: 80, Rows: 24})
+	waitFor(t, first, "typed:")
+
+	if !shared.Send(tea.KeyPressMsg{Code: 'x', Text: "x"}) {
+		t.Fatal("Send should report true while a program is running")
+	}
+	waitFor(t, first, `"value":"x"`)
+}
