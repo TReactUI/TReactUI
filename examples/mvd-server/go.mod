@@ -1,9 +1,9 @@
-module github.com/TReactUI/TReactUI/examples/mvd-server
+module github.com/meta-tui/treactui/examples/mvd-server
 
 go 1.24
 
 require (
-	github.com/TReactUI/TReactUI/packages/tty-go v0.0.0
+	github.com/meta-tui/treactui/packages/tty-go v0.0.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	youtube-downloader v0.0.0
 )
@@ -36,6 +36,6 @@ require (
 
 // Local checkouts: this example serves the real mvd TUI, which lives in its own
 // repository. See README.md.
-replace github.com/TReactUI/TReactUI/packages/tty-go => ../../packages/tty-go
+replace github.com/meta-tui/treactui/packages/tty-go => ../../packages/tty-go
 
 replace youtube-downloader => ../../../mvd

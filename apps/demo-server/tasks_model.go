@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
+	ttygo "github.com/meta-tui/treactui/packages/tty-go"
 )
 
 type task struct {

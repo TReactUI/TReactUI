@@ -15,8 +15,8 @@ import (
 
 	"net/http"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/session"
-	"github.com/TReactUI/TReactUI/packages/tty-go/socket"
+	"github.com/meta-tui/treactui/packages/tty-go/session"
+	"github.com/meta-tui/treactui/packages/tty-go/socket"
 )
 
 // Options configures Handler.

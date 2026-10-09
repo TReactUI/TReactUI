@@ -10,7 +10,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/protocol"
+	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
 
 func send(t *testing.T, tr *memoryTransport, msg protocol.ClientMessage) {

@@ -1,9 +1,9 @@
-module github.com/TReactUI/TReactUI
+module github.com/meta-tui/treactui
 
 go 1.24
 
 require (
-	github.com/TReactUI/TReactUI/packages/tty-go v0.0.0
+	github.com/meta-tui/treactui/packages/tty-go v0.0.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/charmbracelet/lipgloss v1.1.0
 )
@@ -30,4 +30,4 @@ require (
 	golang.org/x/text v0.3.8 // indirect
 )
 
-replace github.com/TReactUI/TReactUI/packages/tty-go => ./packages/tty-go
+replace github.com/meta-tui/treactui/packages/tty-go => ./packages/tty-go

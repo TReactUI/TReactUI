@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/coder/websocket"
 
-	"github.com/TReactUI/TReactUI/packages/tty-go/session"
+	"github.com/meta-tui/treactui/packages/tty-go/session"
 )
 
 // Options configures the WebSocket endpoint.

@@ -1,4 +1,4 @@
-module github.com/TReactUI/TReactUI/packages/tty-go
+module github.com/meta-tui/treactui/packages/tty-go
 
 go 1.24
 

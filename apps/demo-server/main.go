@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	ttygo "github.com/TReactUI/TReactUI/packages/tty-go"
+	ttygo "github.com/meta-tui/treactui/packages/tty-go"
 )
 
 func main() {
