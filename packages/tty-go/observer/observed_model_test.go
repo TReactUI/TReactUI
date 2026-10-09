@@ -3,7 +3,7 @@ package observer
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
@@ -11,9 +11,9 @@ import (
 type counter struct{ n int }
 
 func (c counter) Init() tea.Cmd { return nil }
-func (c counter) View() string  { return "" }
+func (c counter) View() tea.View  { return tea.NewView("") }
 func (c counter) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if _, ok := msg.(tea.KeyMsg); ok {
+	if _, ok := msg.(tea.KeyPressMsg); ok {
 		c.n++
 	}
 	return c, nil
@@ -28,7 +28,7 @@ func TestSnapshotIsSentOnlyWhenItChanges(t *testing.T) {
 
 	model.Init()                      // first snapshot
 	model.Update(tea.WindowSizeMsg{}) // unchanged: no frame
-	model.Update(tea.KeyMsg{})        // changed: second frame
+	model.Update(tea.KeyPressMsg{}) // changed: second frame
 
 	if len(frames) != 2 {
 		t.Fatalf("want 2 snapshot frames, got %d", len(frames))

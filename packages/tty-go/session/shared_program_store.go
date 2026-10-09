@@ -5,16 +5,11 @@ import (
 	"io"
 	"sync"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/observer"
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
-
-// terminalPreamble is what Bubble Tea writes when a program starts (hide the
-// cursor, turn bracketed paste on). A browser that joins a program already
-// running missed it, so it is sent first.
-const terminalPreamble = "\x1b[?25l\x1b[?2004h"
 
 // SharedProgram is one Bubble Tea program that any number of browsers watch
 // and type into at once, like a tmux session. It starts when the first browser
@@ -26,15 +21,14 @@ const terminalPreamble = "\x1b[?25l\x1b[?2004h"
 // keystrokes reach the program.
 type SharedProgram struct {
 	newModel func() tea.Model
-	settings settings
 
 	mu      sync.Mutex
 	running *sharedRun
 }
 
 // NewSharedProgram prepares a shared program; newModel is called each time one starts.
-func NewSharedProgram(newModel func() tea.Model, options ...Option) *SharedProgram {
-	return &SharedProgram{newModel: newModel, settings: newSettings(options)}
+func NewSharedProgram(newModel func() tea.Model) *SharedProgram {
+	return &SharedProgram{newModel: newModel}
 }
 
 // Attach connects one browser to the program, starting it if none is running,
@@ -82,14 +76,13 @@ func (s *SharedProgram) start() *sharedRun {
 	}
 
 	input, typed := io.Pipe()
-	run := &sharedRun{typed: typed, preamble: s.settings.preamble(), viewers: map[*sharedViewer]struct{}{}, finished: make(chan struct{})}
+	run := &sharedRun{window: &windowSize{}, typed: typed, modes: newModeTracker(), viewers: map[*sharedViewer]struct{}{}, finished: make(chan struct{})}
 	run.program = tea.NewProgram(
 		observer.Observe(s.newModel(), run.broadcast),
-		append(s.settings.programOptions(),
+		append(programOptions(run.window),
 			tea.WithInput(input),
 			tea.WithOutput(outputWriter(func(p []byte) { run.broadcast(protocol.NewOutputFrame(string(p))) })),
 			tea.WithContext(context.Background()),
-			tea.WithoutSignalHandler(),
 		)...,
 	)
 	s.running = run
@@ -111,12 +104,15 @@ func (s *SharedProgram) start() *sharedRun {
 type sharedRun struct {
 	program  *tea.Program
 	typed    *io.PipeWriter
-	preamble string
 	finished chan struct{}
 
 	mu       sync.Mutex // guards what follows, and serialises writes to the browsers
 	viewers  map[*sharedViewer]struct{}
-	size     *tea.WindowSizeMsg
+	// modes follows the terminal modes the program has switched on (alternate
+	// screen, mouse reporting, bracketed paste, cursor) so a browser that joins
+	// late can be put in the same state.
+	modes *modeTracker
+	window   *windowSize // the size the latest resize asked for
 	snapshot *protocol.ServerFrame // the latest accessibility snapshot
 }
 
@@ -131,18 +127,20 @@ type sharedViewer struct {
 func (r *sharedRun) join(v *sharedViewer) {
 	r.mu.Lock()
 	r.sendTo(v, protocol.NewHelloFrame())
-	r.sendTo(v, protocol.NewOutputFrame(r.preamble))
+	if replay := r.modes.replay(); replay != "" {
+		r.sendTo(v, protocol.NewOutputFrame(replay))
+	}
 	if r.snapshot != nil {
 		r.sendTo(v, *r.snapshot)
 	}
 	r.viewers[v] = struct{}{}
-	size := r.size
+	size, known := r.window.get()
 	r.mu.Unlock()
 
 	// Sending the size again makes Bubble Tea draw the whole screen, which the
 	// new browser has not seen.
-	if size != nil {
-		r.program.Send(*size)
+	if known {
+		r.program.Send(size)
 	}
 }
 
@@ -154,7 +152,7 @@ func (r *sharedRun) leave(v *sharedViewer) {
 
 func (r *sharedRun) resize(size tea.WindowSizeMsg) {
 	r.mu.Lock()
-	r.size = &size
+	r.window.set(size)
 	r.mu.Unlock()
 	r.program.Send(size)
 }
@@ -163,8 +161,11 @@ func (r *sharedRun) resize(size tea.WindowSizeMsg) {
 func (r *sharedRun) broadcast(frame protocol.ServerFrame) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if frame.Type == "a11y-snapshot" {
+	switch frame.Type {
+	case "a11y-snapshot":
 		r.snapshot = &frame
+	case "output":
+		r.modes.feed([]byte(frame.Data))
 	}
 	for v := range r.viewers {
 		r.sendTo(v, frame)

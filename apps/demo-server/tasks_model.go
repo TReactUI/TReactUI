@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	ttygo "github.com/meta-tui/treactui/packages/tty-go"
 )
@@ -38,24 +38,24 @@ var (
 	helpStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#94a3b8"))
 )
 
-func (m tasksModel) Init() tea.Cmd { return tea.EnableMouseCellMotion }
+func (m tasksModel) Init() tea.Cmd { return nil }
 
 func (m tasksModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "up", "k":
 			m.cursor = max(0, m.cursor-1)
 		case "down", "j":
 			m.cursor = min(len(m.tasks)-1, m.cursor+1)
-		case " ", "enter":
+		case "space", "enter":
 			return m.toggle(m.cursor)
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
-	case tea.MouseMsg:
+	case tea.MouseClickMsg:
 		row := msg.Y - headerLines
-		if msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonLeft && row >= 0 && row < len(m.tasks) {
+		if msg.Button == tea.MouseLeft && row >= 0 && row < len(m.tasks) {
 			m.cursor = row
 			return m.toggle(row)
 		}
@@ -74,7 +74,7 @@ func (m tasksModel) toggle(index int) (tea.Model, tea.Cmd) {
 	return m, func() tea.Msg { return ttygo.AnnounceMsg{Text: text} }
 }
 
-func (m tasksModel) View() string {
+func (m tasksModel) View() tea.View {
 	out := titleStyle.Render("Tasks") + "\n\n"
 	for i, t := range m.tasks {
 		box := "[ ]"
@@ -90,7 +90,9 @@ func (m tasksModel) View() string {
 		}
 		out += line + "\n"
 	}
-	return out + "\n" + helpStyle.Render("↑/↓ move · space or click toggles · q quits")
+	view := tea.NewView(out + "\n" + helpStyle.Render("↑/↓ move · space or click toggles · q quits"))
+	view.MouseMode = tea.MouseModeCellMotion
+	return view
 }
 
 // Accessible describes the list as a listbox, so a screen reader announces

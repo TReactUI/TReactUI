@@ -102,7 +102,7 @@ Other combinations are in each example's README.
   (`Refs #12`), and close it when it is released.
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org) and are checked by commitlint
   (a lowercase subject, a header of at most 100 characters). `feat` and `fix` commits release.
-- **The gate** is what CI runs: `npx nx run-many -t lint typecheck test build`. Go needs Go 1.24 or newer;
+- **The gate** is what CI runs: `npx nx run-many -t lint typecheck test build`. Go needs Go 1.26 or newer (Bubble Tea v2);
   the Python tests need Python 3.
 - **Every push to `main` can publish to public npm.** CI runs `nx release`, which versions and publishes the
   packages that have `feat` or `fix` commits since their last release.

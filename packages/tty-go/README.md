@@ -1,6 +1,6 @@
 # tty-go
 
-Serves a [Bubble Tea](https://github.com/charmbracelet/bubbletea) (v1) program to
+Serves a [Bubble Tea v2](https://github.com/charmbracelet/bubbletea) program (`charm.land/bubbletea/v2`) to
 the browser for [`@treactui/tty`](../tty): the real terminal output over a
 WebSocket, plus the semantic information assistive technology needs.
 
@@ -25,15 +25,17 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
   screen, and it keeps running when no browser is open (a reload or a second window finds it as it was).
   It starts when the first browser connects and again after the program quits; the screen has the size
   of the latest resize.
-- `Options.Mouse` turns mouse reporting on, so a model receives `tea.MouseMsg` (clicks, the wheel, drags),
-  also in a shared program for a browser that joins late. With it on the browser passes mouse events to the
-  program instead of selecting text; Shift+drag selects. Pasting text works either way (bracketed paste).
+- Mouse reporting, the alternate screen, bracketed paste and the cursor are the program's own business: a v2
+  model asks for them from its `View` (`tea.View.MouseMode`, `AltScreen`) and the page's terminal follows.
+  With mouse reporting on, the browser passes mouse events to the program instead of selecting text;
+  Shift+drag selects. A shared program remembers which of these modes are on and puts a browser that joins
+  late in the same state. Pasting text works either way (bracketed paste).
 - A model may implement `ttygo.Accessible` to describe its screen. A snapshot is
   sent whenever it changes.
 - A command may return `ttygo.AnnounceMsg` (screen-reader announcement) or
   `ttygo.EventMsg` (a web-only action for the page).
-- `Handler` forces true colour process-wide: a browser is not a TTY, so Lipgloss
-  would otherwise strip every style.
+- Every program is started with true colour forced (`tea.WithColorProfile`): a browser is not a TTY, so
+  Bubble Tea would otherwise strip every style.
 - Only same-host pages may connect unless `Options.AllowedOrigins` says otherwise.
   The endpoint runs a program, so a foreign page must not be able to open it.
 
