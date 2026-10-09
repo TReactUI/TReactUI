@@ -39,6 +39,43 @@ mux.Handle("/term", ttygo.Handler(func() tea.Model { return newModel() }, ttygo.
 - Only same-host pages may connect unless `Options.AllowedOrigins` says otherwise.
   The endpoint runs a program, so a foreign page must not be able to open it.
 
+## Over a desktop shell's events (no server, no port)
+
+A desktop app that shows the page itself, a [Wails](https://wails.io) window for example, does not need a
+WebSocket, a port or an Origin check: the page and the program can talk through the shell's own event bus.
+`ttygo.Bind` (a program per connection) and `ttygo.BindShared` (one shared program) serve over two named events,
+`treactui:up` (page to Go) and `treactui:down` (Go to page), with the page using `createWailsSocket()` from
+[`@treactui/tty`](../tty). The host hands over its event functions, so `tty-go` takes no dependency on Wails:
+
+```go
+type events struct{ ctx context.Context }
+
+func (e events) On(name string, handler func(string)) func() {
+	return runtime.EventsOn(e.ctx, name, func(data ...interface{}) {
+		if len(data) > 0 {
+			if s, ok := data[0].(string); ok {
+				handler(s)
+			}
+		}
+	})
+}
+func (e events) Emit(name, data string) { runtime.EventsEmit(e.ctx, name, data) }
+
+// in options.App.OnStartup, with the Wails context:
+shared := ttygo.NewSharedProgram(func() tea.Model { return newModel() })
+stop := ttygo.BindShared(ctx, shared, events{ctx}, ttygo.BindOptions{})
+```
+
+- One connection is served at a time: the latest page to open (a reload replaces the old one). A shared
+  program keeps running between them; `shared.Send(msg)` lets the host talk to it, for example to start
+  the program's own quit flow when the window is closed.
+- Wails handles every event from the page in a goroutine of its own, so they can arrive out of order. Each
+  message carries the connection's id and a sequence number, and both sides put them back in order. The
+  page's events must therefore come from `createWailsSocket`, or from a transport that does the same
+  (`bridge/` documents the messages).
+- The page is told when the program ends (`close`), as a WebSocket would be.
+- `BindOptions.Prefix` renames the events (`"mvd"` gives `mvd:up` and `mvd:down`); the page must use the same.
+
 ## Commands
 
 The protocol's command catalog (`commands`, `run`, `stop`) is mirrored in `protocol/`, so a Go backend can
@@ -55,9 +92,10 @@ protocol/   wire messages and their encoding. Depends on nothing.
 observer/   wraps a model: emits snapshots, turns announce/event messages into frames
 session/    runs one program over an abstract Transport: one per connection, or one shared by all
 socket/     the WebSocket adapter for Transport
+bridge/     the event adapter for Transport (a desktop shell's event bus instead of a server)
 ```
 
-The root package re-exports what a program needs (`Handler`, `Accessible`,
+The root package re-exports what a program needs (`Handler`, `Bind`, `Accessible`,
 `Snapshot`, `A11yNode`, `AnnounceMsg`, `EventMsg`).
 
 ## Testing
