@@ -3,13 +3,13 @@ package main
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	ttygo "github.com/meta-tui/treactui/packages/tty-go"
 )
 
 func TestSpaceTogglesTheSelectedTaskAndAnnouncesIt(t *testing.T) {
-	model, cmd := newTasksModel().Update(tea.KeyMsg{Type: tea.KeySpace})
+	model, cmd := newTasksModel().Update(tea.KeyPressMsg{Code: tea.KeySpace, Text: " "})
 
 	snapshot := model.(ttygo.Accessible).Accessible()
 	option := snapshot.Nodes[0].Children[0]
@@ -22,7 +22,7 @@ func TestSpaceTogglesTheSelectedTaskAndAnnouncesIt(t *testing.T) {
 }
 
 func TestClickOnARowSelectsAndTogglesIt(t *testing.T) {
-	model, _ := newTasksModel().Update(tea.MouseMsg{Y: headerLines + 2, Action: tea.MouseActionPress, Button: tea.MouseButtonLeft})
+	model, _ := newTasksModel().Update(tea.MouseClickMsg{Y: headerLines + 2, Button: tea.MouseLeft})
 
 	options := model.(ttygo.Accessible).Accessible().Nodes[0].Children
 	if !options[2].Selected || options[2].Label != "Toggle this one with space or a click, done" {

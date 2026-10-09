@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
@@ -56,8 +56,10 @@ func TestSharedProgramShowsABrowserThatJoinsLateTheCurrentScreen(t *testing.T) {
 	}
 
 	send(t, second, protocol.ClientMessage{Type: "input", Data: "b"})
-	waitFor(t, first, "typed:ab")
-	waitFor(t, second, "typed:ab")
+	// Bubble Tea v2 writes only the cells that changed, so the new letter
+	// arrives on its own after the "typed:a" both browsers already have.
+	waitFor(t, first, `"data":"b"`)
+	waitFor(t, second, `"data":"b"`)
 }
 
 func TestSharedProgramKeepsRunningWhenEveryBrowserLeaves(t *testing.T) {
@@ -108,20 +110,26 @@ func TestSharedProgramStartsANewOneAfterTheProgramQuits(t *testing.T) {
 	}
 }
 
-// clicked shows where the last mouse press was.
+// clicked shows where the last mouse press was. Like any Bubble Tea v2 program
+// it asks for the alternate screen and mouse reporting from its View.
 type clicked struct{ at string }
 
 func (c clicked) Init() tea.Cmd { return nil }
-func (c clicked) View() string  { return "click:" + c.at }
+func (c clicked) View() tea.View {
+	v := tea.NewView("click:" + c.at)
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+	return v
+}
 func (c clicked) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if mouse, ok := msg.(tea.MouseMsg); ok && mouse.Action == tea.MouseActionPress {
-		c.at = fmt.Sprintf("%d,%d", mouse.X, mouse.Y)
+	if click, ok := msg.(tea.MouseClickMsg); ok {
+		c.at = fmt.Sprintf("%d,%d", click.X, click.Y)
 	}
 	return c, nil
 }
 
-func TestSharedProgramWithMouseReportsClicksAndTellsALateBrowserToo(t *testing.T) {
-	shared := NewSharedProgram(func() tea.Model { return clicked{} }, WithMouse())
+func TestSharedProgramReportsClicksAndPutsALateBrowserInTheSameModes(t *testing.T) {
+	shared := NewSharedProgram(func() tea.Model { return clicked{} })
 	first := &memoryTransport{incoming: make(chan []byte, 8)}
 	cancelFirst, _ := attach(shared, first)
 	defer cancelFirst()
@@ -130,15 +138,16 @@ func TestSharedProgramWithMouseReportsClicksAndTellsALateBrowserToo(t *testing.T
 
 	// A left button press at column 5, row 3, as a terminal reports it (SGR, 1-based).
 	send(t, first, protocol.ClientMessage{Type: "input", Data: "\x1b[<0;6;4M"})
-	waitFor(t, first, "click:5,3")
+	waitFor(t, first, "5,3")
 
 	late := &memoryTransport{incoming: make(chan []byte, 8)}
 	cancelLate, _ := attach(shared, late)
 	defer cancelLate()
 	waitFor(t, late, `\u001b[?1006h`)
+	waitFor(t, late, `\u001b[?1049h`)
 }
 
-func TestSharedProgramWithoutMouseDoesNotAskForMouseReports(t *testing.T) {
+func TestSharedProgramThatNeverAsksForTheMouseDoesNotGetReports(t *testing.T) {
 	shared := NewSharedProgram(func() tea.Model { return echo{} })
 	first := &memoryTransport{incoming: make(chan []byte, 8)}
 	cancelFirst, _ := attach(shared, first)
@@ -148,6 +157,6 @@ func TestSharedProgramWithoutMouseDoesNotAskForMouseReports(t *testing.T) {
 	waitFor(t, first, "typed:a")
 
 	if strings.Contains(strings.Join(first.frames(), "\n"), `\u001b[?1002h`) {
-		t.Error("mouse reporting should be off unless asked for")
+		t.Error("mouse reporting should be off unless the program asks for it")
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
@@ -48,10 +48,10 @@ func (m *memoryTransport) frames() []string {
 type echo struct{ typed string }
 
 func (e echo) Init() tea.Cmd { return nil }
-func (e echo) View() string  { return "typed:" + e.typed }
+func (e echo) View() tea.View  { return tea.NewView("typed:" + e.typed) }
 func (e echo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if key, ok := msg.(tea.KeyMsg); ok {
-		if key.Type == tea.KeyCtrlC {
+	if key, ok := msg.(tea.KeyPressMsg); ok {
+		if key.String() == "ctrl+c" {
 			return e, tea.Quit
 		}
 		e.typed += key.String()

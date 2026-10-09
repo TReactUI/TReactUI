@@ -5,6 +5,9 @@ setup screens (download list, preferences, advanced, folder picker) and the down
 screen, with the loop between them, to prove the approach on an existing Bubble Tea
 application.
 
+> **Not yet on Bubble Tea v2.** `tty-go` now serves Bubble Tea v2 programs and mvd is still on v1, so this
+> example does not build against the current adapter until mvd moves to v2. It last built against `tty-go` 0.0.1.
+
 It is its own Go module, with `replace` directives for local checkouts:
 `github.com/meta-tui/treactui => ../..` and `youtube-downloader => ../../../mvd`
 (a sibling checkout of the mvd repository at `main`, which has `tui.NewAppModel` and

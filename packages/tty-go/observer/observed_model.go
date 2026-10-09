@@ -6,7 +6,7 @@ package observer
 import (
 	"encoding/json"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
 )
@@ -44,7 +44,7 @@ func (m *observedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *observedModel) View() string { return m.inner.View() }
+func (m *observedModel) View() tea.View { return m.inner.View() }
 
 func (m *observedModel) publish() {
 	accessible, ok := m.inner.(protocol.Accessible)

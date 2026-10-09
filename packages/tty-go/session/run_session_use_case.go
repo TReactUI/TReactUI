@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/meta-tui/treactui/packages/tty-go/observer"
 	"github.com/meta-tui/treactui/packages/tty-go/protocol"
@@ -14,7 +14,7 @@ import (
 // Run drives a fresh program from newModel over t until the browser leaves or
 // the program quits. Keystrokes arrive as terminal input, resizes as
 // tea.WindowSizeMsg, and the program's output goes back as output frames.
-func Run(ctx context.Context, t Transport, newModel func() tea.Model, options ...Option) error {
+func Run(ctx context.Context, t Transport, newModel func() tea.Model) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -31,13 +31,13 @@ func Run(ctx context.Context, t Transport, newModel func() tea.Model, options ..
 	send(protocol.NewHelloFrame())
 
 	input, typed := io.Pipe()
+	var size windowSize
 	program := tea.NewProgram(
 		observer.Observe(newModel(), send),
-		append(newSettings(options).programOptions(),
+		append(programOptions(&size),
 			tea.WithInput(input),
 			tea.WithOutput(outputWriter(func(p []byte) { send(protocol.NewOutputFrame(string(p))) })),
 			tea.WithContext(ctx),
-			tea.WithoutSignalHandler(),
 		)...,
 	)
 
@@ -62,7 +62,9 @@ func Run(ctx context.Context, t Transport, newModel func() tea.Model, options ..
 			case "input":
 				_, _ = typed.Write([]byte(msg.Data))
 			case "resize":
-				program.Send(tea.WindowSizeMsg{Width: msg.Cols, Height: msg.Rows})
+				resized := tea.WindowSizeMsg{Width: msg.Cols, Height: msg.Rows}
+				size.set(resized)
+				program.Send(resized)
 			}
 		}
 	}()
