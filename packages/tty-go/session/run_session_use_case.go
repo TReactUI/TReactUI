@@ -36,7 +36,7 @@ func Run(ctx context.Context, t Transport, newModel func() tea.Model) error {
 		observer.Observe(newModel(), send),
 		append(programOptions(&size),
 			tea.WithInput(input),
-			tea.WithOutput(outputWriter(func(p []byte) { send(protocol.NewOutputFrame(string(p))) })),
+			tea.WithOutput(outputWriter(func(p []byte) { send(protocol.NewOutputFrame(rawLineFeeds(p))) })),
 			tea.WithContext(ctx),
 		)...,
 	)

@@ -96,7 +96,7 @@ func (s *SharedProgram) start() *sharedRun {
 		observer.Observe(s.newModel(), run.broadcast),
 		append(programOptions(run.window),
 			tea.WithInput(input),
-			tea.WithOutput(outputWriter(func(p []byte) { run.broadcast(protocol.NewOutputFrame(string(p))) })),
+			tea.WithOutput(outputWriter(func(p []byte) { run.broadcast(protocol.NewOutputFrame(rawLineFeeds(p))) })),
 			tea.WithContext(context.Background()),
 		)...,
 	)
