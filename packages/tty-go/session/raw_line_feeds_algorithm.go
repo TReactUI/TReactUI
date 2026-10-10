@@ -1,20 +1,39 @@
 package session
 
-import "strings"
+import (
+	"runtime"
+	"strings"
+)
 
 // indexRow is IND (ESC D): move down one row, keeping the column, scrolling at
-// the bottom. It is what a line feed does on a terminal in raw mode.
+// the bottom.
 const indexRow = "\x1bD"
 
-// rawLineFeeds rewrites each line feed as IND.
+// rawLineFeeds makes a Bubble Tea frame mean to the page what Bubble Tea meant.
 //
-// Bubble Tea v2 writes a bare "\n" to mean "down one row, same column" and
-// positions the next cell relative to that. The page's terminal (xterm.js, as
-// set up by @treactui/tty) turns "\n" into "\r\n" (convertEol, which Bubble Tea
-// v1 relied on), so the cursor would jump to column 0 and the text after it
-// would land in the wrong place. convertEol only touches the line feed
-// character, so IND passes through unchanged and moves the cursor as the
-// program intended.
+// Bubble Tea v2 decides what a bare "\n" means in its output from the OS it
+// runs on (tea.go: mapNl := runtime.GOOS != "windows" && p.ttyInput == nil):
+//
+//   - Everywhere but Windows it takes "\n" to also return to column 0, as a
+//     terminal in cooked mode does, and positions the next cell from there.
+//   - On Windows it takes "\n" to move down and keep the column.
+//
+// The page's terminal (xterm.js, as set up by @treactui/tty) turns "\n" into
+// "\r\n" (convertEol), which is right for the first case and wrong for the
+// second. So the frame is rewritten to say what Bubble Tea meant without
+// depending on that setting: "\r\n" for the first, and IND for the second,
+// which convertEol leaves alone.
 func rawLineFeeds(output []byte) string {
-	return strings.ReplaceAll(string(output), "\n", indexRow)
+	return lineFeeds(string(output), runtime.GOOS == "windows")
+}
+
+// lineFeeds rewrites every bare line feed: as IND when keepColumn (Bubble Tea
+// took the line feed to keep the column), otherwise as a carriage return and a
+// line feed. A "\r\n" the program wrote itself is kept in the second case and
+// loses its "\r" in the first, where IND moves down on its own.
+func lineFeeds(output string, keepColumn bool) string {
+	if keepColumn {
+		return strings.ReplaceAll(output, "\n", indexRow)
+	}
+	return strings.ReplaceAll(strings.ReplaceAll(output, "\r\n", "\n"), "\n", "\r\n")
 }
